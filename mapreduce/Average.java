@@ -82,6 +82,8 @@ IOException {
         FileInputFormat.setInputPaths(conf, new Path(input));
         FileOutputFormat.setOutputPath(conf, new Path(output));
         //Average.column = 2;
+        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.50"));
+        conf.setBoolean("mapred.map.pipeline", true);
         JobClient.runJob(conf);
  }
 }
