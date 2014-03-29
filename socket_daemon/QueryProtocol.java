@@ -20,34 +20,25 @@ public class QueryProtocol {
     private int state = READY;
     
 
-    public List<String> performMapReduce()
+    public List<String> performMapReduce(String key_i, String col_i)
     {
         List<String> qresults = new ArrayList();
         try {
              QuerySumMapReduce qs = new QuerySumMapReduce();
-             qs.run("yahoo_data", "query_out", "5", "3");
+             //qs.run("yahoo_data", "query_out", "5", "3");
+             qs.run("yahoo_data", "query_out", key_i, col_i);
              System.out.println("FINSIHED MAP REDUCE");             
              ReadSnapshot rs = new ReadSnapshot("query_out");
-             if(rs.validateFile())
-                qresults = rs.readFile();             
+                qresults = rs.readFile();
+             System.out.println(qresults);             
+            /*
              for(String temp : qresults) 
              {
                  System.out.println(temp);
-             }
+             }*/
              
         } catch (Exception e) {
              System.err.println("CAUGHT EXCEPTION: " + e.getMessage());
-        }
-        try {
-             ReadSnapshot rs = new ReadSnapshot("query_out");
-             if(rs.validateFile())
-                qresults = rs.readFile();             
-             for(String temp : qresults) 
-             {
-                 System.out.println(temp);
-             }
-        } catch(Exception e){
-             System.err.println("CAUGHT Exception in reading snapshot: " + e.getMessage());
         }
         return qresults;
     }
@@ -67,12 +58,13 @@ public class QueryProtocol {
         if (state == READY) {
             if(theInput.toLowerCase().contains(SUM))
             {
-              return performMapReduce();
+              String[] splits = theInput.split(" ");
+              return performMapReduce(splits[1], splits[2]);
             }
-            theOutput.add("Ready to process query!");
+            theOutput.add("Processing query!");
             state = PROCESSINGQUERY;
         } else if (state == PROCESSINGQUERY) {
-            theOutput.add("Processing query!");
+            theOutput.add("Read to process query");
             state = READY;
         } 
         return theOutput;
