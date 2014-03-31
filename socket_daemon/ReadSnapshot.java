@@ -50,8 +50,6 @@ public class ReadSnapshot{
 
    public List<String> readFile() throws Exception
    {
-       //FSDataInputStream in = fs.open(path);
-       //CompressionCodeFactory factory = new CompressionCodeFactory(conf);
        FileStatus[] items = fs.listStatus(path);
        if (items == null) return new ArrayList<String>();
        List<String> results = new ArrayList<String>();
@@ -62,31 +60,30 @@ public class ReadSnapshot{
              continue;
           }
           FSDataInputStream in = fs.open(item.getPath());
-          //InputStream stream = fileSystem.open(item.getPath());
           
           byte buffer[] = new byte[1024];
           int bytesRead = 0;
           while((bytesRead = in.read(buffer)) != -1  )
           {
-            System.out.println(new String(buffer, 0, bytesRead, "UTF-8"));
+         //   System.out.println(new String(buffer, 0, bytesRead, "UTF-8"));
             String raw = new String(buffer, 0, bytesRead, "UTF-8");
-         /*   String [] result = raw.split("\n");
+          /*  String [] result = raw.split("\n");
             for(String str: raw.split("\n"))
             {
                 results.add(str);
-            } */
+            } */ 
             results.add(raw);
-            System.out.println(new String(buffer, 0, bytesRead, "UTF-8"));
           }
-         //in.close();
        }
+       
+       fs.delete(path, true);
        return results;
    }
 
    public static void main(String args[]) throws Exception
    {
        ReadSnapshot rs = new ReadSnapshot(args[0]);
-       if(rs.validateFile())
+//       if(rs.validateFile())
           rs.readFile();
 
    }
