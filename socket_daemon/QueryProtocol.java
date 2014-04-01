@@ -30,12 +30,12 @@ public class QueryProtocol {
              System.out.println("FINSIHED MAP REDUCE");             
              ReadSnapshot rs = new ReadSnapshot("query_out");
                 qresults = rs.readFile();
-             System.out.println(qresults);             
-            /*
+             //System.out.println(qresults);             
+            
              for(String temp : qresults) 
              {
                  System.out.println(temp);
-             }*/
+             }
              
         } catch (Exception e) {
              System.err.println("CAUGHT EXCEPTION: " + e.getMessage());
@@ -45,26 +45,34 @@ public class QueryProtocol {
  
     public List<String> processInput(String theInput) {
         List<String> theOutput = new ArrayList();
-        if(theInput == null)
+        if(theInput == null || theInput == "")
            {
                theOutput.add("Ready to process query!");
+               state = READY;
                return theOutput;
            }
         if(theInput.equalsIgnoreCase("bye"))
         {
              theOutput.add("Bye");
              state = READY;
+             return theOutput;
         }
         if (state == READY) {
             if(theInput.toLowerCase().contains(SUM))
             {
               String[] splits = theInput.split(" ");
+              state = PROCESSINGQUERY;
               return performMapReduce(splits[1], splits[2]);
             }
-            theOutput.add("Processing query!");
-            state = PROCESSINGQUERY;
+            else
+            {
+               //theOutput.add("Invalid client operation "+ theInput);
+               theOutput.add("Ready to process query!"); 
+               return theOutput;
+            }
         } else if (state == PROCESSINGQUERY) {
-            theOutput.add("Read to process query");
+            if(theInput.toLowerCase().contains("cancel"))
+               theOutput.add("Cancelling query");
             state = READY;
         } 
         return theOutput;
