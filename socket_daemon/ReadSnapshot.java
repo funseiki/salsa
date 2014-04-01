@@ -67,12 +67,12 @@ public class ReadSnapshot{
           {
          //   System.out.println(new String(buffer, 0, bytesRead, "UTF-8"));
             String raw = new String(buffer, 0, bytesRead, "UTF-8");
-          /*  String [] result = raw.split("\n");
+            String [] result = raw.split("\n");
             for(String str: raw.split("\n"))
             {
                 results.add(str);
-            } */ 
-            results.add(raw);
+            }  
+           // results.add(raw);
           }
        }
        
