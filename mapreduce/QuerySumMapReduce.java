@@ -33,10 +33,10 @@ import org.apache.hadoop.util.Progressable;
 
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 
-class Map extends MapReduceBase implements Mapper<Text, Text, Text, IntWritable> {   
+class Map extends MapReduceBase implements Mapper<Text, Text, Text, FloatWritable> {   
        private Text word = new Text();  
 
-       public void map(Text key, Text value, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {   
+       public void map(Text key, Text value, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {   
            String line = value.toString(); 
            String index = key.toString();
 
@@ -50,7 +50,7 @@ class Map extends MapReduceBase implements Mapper<Text, Text, Text, IntWritable>
               word.set(tokens[key_index].trim());
            else
               word.set("");
-           IntWritable value_sum = new IntWritable();
+           FloatWritable value_sum = new FloatWritable();
            if(value_index != -1)
                value_sum.set(Integer.parseInt(tokens[value_index]));   
            else
@@ -74,7 +74,7 @@ public class QuerySumMapReduce{
         System.out.println("Column indexes are " + index);
         conf.setJobName(index);  
         conf.setOutputKeyClass(Text.class);  
-        conf.setOutputValueClass(IntWritable.class);  
+        conf.setOutputValueClass(FloatWritable.class);  
 
         // Select the map class which belongs to the certain column
         conf.setMapperClass(Map.class);  
@@ -106,13 +106,13 @@ public class QuerySumMapReduce{
         //JobClient.runJob(conf);  
      }
 
-     public static class Reduce extends MapReduceBase implements Reducer<Text, IntWritable, Text, IntWritable> {   
-       public void reduce(Text key, Iterator<IntWritable> values, OutputCollector<Text, IntWritable> output, Reporter reporter) throws IOException {   
-       int sum = 0;  
+     public static class Reduce extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {   
+       public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {   
+       float sum = 0;  
         while (values.hasNext()) {  
           sum = sum + values.next().get();
         }  
-        output.collect(key, new IntWritable(sum));  
+        output.collect(key, new FloatWritable(sum));  
       }  
     }  
   
