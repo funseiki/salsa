@@ -83,6 +83,9 @@ IOException {
         fs.delete(out, true);
         FileOutputFormat.setOutputPath(conf, out);
 
+        String jobID = conf.get("mapred.job.id");
+        JobClient jobClient = new JobClient(conf);
+        RunningJob job = jobClient.getJob(JobID.forName(jobID));
 
         JobClient.runJob(conf);
     }

@@ -83,15 +83,12 @@ class MapReduceJob extends NotificationThread implements Runnable
     Thread t;
     String input, output;
 
-    public MapReduceJob()
+    public MapReduceJob(String input, String output)
     {
         t = new Thread(this);
+        this.input = input;
+        this.output = output;
         t.start();
-    }
-
-    public void setJobArgs()
-    {
-
     }
 
     public void startJob()
@@ -101,7 +98,8 @@ class MapReduceJob extends NotificationThread implements Runnable
         try
         {
             Average job = new Average();
-            job.run("/tmp/input/JobHandler.csv","/tmp/output/average_output","2","2");
+            //Make this generic
+            job.run(input,output,"2","2");
         }
         catch(Exception e)
         {
@@ -111,8 +109,12 @@ class MapReduceJob extends NotificationThread implements Runnable
         System.out.println("Finshed MapReduce Job");
         
     }
-}
 
+    public void join() throws InterruptedException
+    {
+        t.join();
+    }
+}
 
 
 class Poll implements Runnable, ThreadCompleteListener
@@ -121,6 +123,9 @@ class Poll implements Runnable, ThreadCompleteListener
     String dirPath;
     NotificationThread mapReduceThread;
     Boolean mapReduceComplete;
+    String mostRecentSnapshot;
+    Path snapshotPath;
+    FileSystem fs;
 
 	public Poll(String dirPath, NotificationThread mapReduceThread)
 	{
@@ -140,27 +145,31 @@ class Poll implements Runnable, ThreadCompleteListener
             conf.set("fs.default.name", "hdfs://localhost:54310");
             conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-site.xml"));
             conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-default.xml"));
-            FileSystem fs = FileSystem.get(conf);
-            String mostRecentSnapshot = null;
+            fs = FileSystem.get(conf);
+            mostRecentSnapshot = null;
             long snapshotTime = -1;
             while(!mapReduceComplete)
             {
+                Thread.sleep(3000);
                 FileStatus[] status = fs.listStatus(new Path(dirPath));;
                 for (int i=0;i<status.length;i++){
-                String path = status[i].getPath().getName();
-                if(path.contains("snapshot"))
+                Path path = status[i].getPath();
+                String fileName = path.getName();
+                if(fileName.contains("snapshot"))
                 {
                     if(mostRecentSnapshot == null || status[i].getModificationTime() > snapshotTime)
                     {
-                        mostRecentSnapshot = path;
+                        mostRecentSnapshot = fileName;
                         snapshotTime = status[i].getModificationTime();
+                        snapshotPath = path;
                     }
                 }
                 }
-                Thread.sleep(2000);
+                System.out.println("------------------------------------");
+                System.out.println(mostRecentSnapshot+" "+snapshotTime);
+                System.out.println("------------------------------------");
+
             }
-            
-            System.out.println(mostRecentSnapshot+" "+snapshotTime);
             }catch(Exception e){
 		System.out.println(e);
                 System.out.println("File not found");
@@ -176,14 +185,40 @@ class Poll implements Runnable, ThreadCompleteListener
         performPoll();
     }
 
+    /*String may not be the right data structure to return here*/
+    public Path getSnapshotPath() throws IOException
+    {
+        return snapshotPath;
+    }
+
+    public void join() throws InterruptedException
+    {
+        t.join();
+    }
 }
 
 
 
 
 public class JobHandler{
-    public static void main (String [] args) throws Exception{
-	NotificationThread t1 = new MapReduceJob();
-    Poll p1 = new Poll("/tmp/output/average_output", t1);
+    
+    public void run(String input, String output) throws InterruptedException
+    {
+        MapReduceJob t1 = new MapReduceJob(input, output);
+        Poll p1 = new Poll(output, t1);   
     }
+
+
+    public Path getSnapshotPath()
+    {
+        return p1.getSnapshotPath();
+    }
+
+    public static void main (String [] args) throws Exception{
+	   String input = "/tmp/input/test.csv";
+       String output = "/tmp/output/average_output";
+       JobHandler job = new JobHandler();
+       job.run(input, output);
+    }
+
 }
