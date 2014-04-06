@@ -13,28 +13,38 @@ import org.apache.hadoop.util.*;
 public class Average {
 
 
-public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, IntWritable, FloatWritable> {
+public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, FloatWritable> {
     private FloatWritable outputValue = new FloatWritable();
-    private IntWritable outputKey = new IntWritable();
+    private Text outputKey = new Text();
 
     public int column;
+    public int group_by;
 
     public void configure(JobConf job) {
-         column = job.getInt("column",0);
-         outputKey.set(column);
+         group_by = job.getInt("group_by",-1);
+         column = job.getInt("column",-1);
+         
     }
-    public void map(LongWritable key, Text value, OutputCollector<IntWritable, FloatWritable> output, Reporter reporter) throws IOException {
+    public void map(LongWritable key, Text value, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
+        System.out.println(key);
         String line = value.toString();
         String[] fields = line.split(",");
-        outputValue.set(Float.parseFloat(fields[column]));
+        if(group_by != -1)
+            outputKey.set(fields[group_by]);
+        else
+            outputKey.set("");
+        if(column != -1)
+            outputValue.set(Float.parseFloat(fields[column]));
+        else
+            outputValue.set(0f);
         output.collect(outputKey, outputValue);
         }
     }
  
 
- public static class Reduce extends MapReduceBase implements Reducer<IntWritable, FloatWritable, IntWritable, FloatWritable> {
+ public static class Reduce extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {
 
-    public void reduce(IntWritable key, Iterator<FloatWritable> values, OutputCollector<IntWritable, FloatWritable> output, Reporter reporter) throws
+    public void reduce(Text key, Iterator<FloatWritable> values, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws
 IOException {
         float value, count = 0f;
         float sum = 0;
@@ -57,10 +67,13 @@ IOException {
         conf.set("mapred.job.tracker", "localhost:54311");
         conf.set("fs.default.name", "hdfs://localhost:54310");
         conf.setJobName("average");
+
+        int group_by = Integer.parseInt(key_index);
+        conf.setInt("group_by",group_by);
         int column = Integer.parseInt(value_index);
         conf.setInt("column",column);
 
-        conf.setOutputKeyClass(IntWritable.class);
+        conf.setOutputKeyClass(Text.class);
         conf.setOutputValueClass(FloatWritable.class);
 
         conf.setMapperClass(Map.class);
