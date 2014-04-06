@@ -10,18 +10,18 @@ Instructions to compile and run JobHandler:
 
 Instructions to compile and run QueryDaemon, ReadSnapshot, QuerySumMapReduce:
 
-javac -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d query_classes *.java
-jar -cvf query.jar -C query_classes/ .
+```javac -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d query_classes *.java``` <br> 
+```jar -cvf query.jar -C query_classes/ . ```
 
 Instructions to run the QueryDaemon
 
-hadoop jar query.jar QueryDaemon <port number>
+```hadoop jar query.jar QueryDaemon <port number>```
 
 Instructions to compile and run the TestClient:
 
-javac TestClient.java
+```javac TestClient.java``` <br>
 
-java TestClient <port number that the QueryDaemon uses>
+```java TestClient <port number that the QueryDaemon uses>``` <br>
 
       Server: Ready to process query.
       sum 5 3
