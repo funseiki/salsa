@@ -1,6 +1,7 @@
 var express = require('express')
     , http = require('http')
-    , path = require('path');
+    , path = require('path')
+    , client = require('./client-listener');
 
 var app = express();
 
@@ -14,6 +15,8 @@ app.get("/", function(req, res) {
     //res.sendfile(path.join(__dirname, "ui/public/index.html"));
 });
 
-http.createServer(app).listen(app.get('port'), function() {
+var server = http.createServer(app);
+client.listen(server);
+server.listen(app.get('port'), function() {
     console.log("Express server listening on", app.get('port'));
 });
