@@ -3,5 +3,9 @@
 *.project
 
 # /webserver/
+
+# /webserver/node_modules
+/webserver/node_modules
+
 # /webserver/ui/assets/dependencies
 /webserver/ui/assets/dependencies
