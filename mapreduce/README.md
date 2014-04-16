@@ -8,7 +8,7 @@ Instructions to compile and run JobHandler:
  ```javac -classpath ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d . JobHandler.java``` <br>
  ```java -classpath ${HADOOP_HOME}/hadoop-hop-0.2-core.jar:${HADOOP_HOME}/lib/commons-logging-1.0.4.jar:. mapreduce.JobHandler```
 
-NOTE: Change the port of the Sum, Average and JobHandler to the ports that are used for the jobtracker, namenode when running hadoop online.
+NOTE: Change the port of the Sum, Average and JobHandler to the ports that are used for the jobtracker, namenode when running hadoop online. <br>
 Instructions to build mapreduce.jar which contains Sum, Average, JobHandler code needed for the QueryDaemon
  
   ```javac -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d mapreduce_classes CustomInputFormat.java Sum.java Average.java JobHandler.java```
