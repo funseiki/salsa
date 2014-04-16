@@ -64,8 +64,10 @@ IOException {
     {
         /* Set column based on command line argument*/
         JobConf conf = new JobConf(Average.class);
-        conf.set("mapred.job.tracker", "localhost:54311");
-        conf.set("fs.default.name", "hdfs://localhost:54310");
+        //conf.set("mapred.job.tracker", "localhost:50030");
+        conf.set("mapred.job.tracker", "localhost:9001");
+        //conf.set("fs.default.name", "hdfs://localhost:54310");
+        conf.set("fs.default.name", "hdfs://localhost:9000");
         conf.setJobName("average");
 
         int group_by = Integer.parseInt(key_index);
