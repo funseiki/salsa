@@ -1,3 +1,5 @@
+package mapreduce;
+
 import java.io.IOException;
 
 import org.apache.hadoop.fs.FileSystem;
