@@ -8,23 +8,14 @@ Instructions to compile and run JobHandler:
  ```javac -classpath ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d . JobHandler.java``` <br>
  ```java -classpath ${HADOOP_HOME}/hadoop-hop-0.2-core.jar:${HADOOP_HOME}/lib/commons-logging-1.0.4.jar:. mapreduce.JobHandler```
 
-Instructions to compile and run QueryDaemon, ReadSnapshot, QuerySumMapReduce:
+NOTE: Change the port of the Sum, Average and JobHandler to the ports that are used for the jobtracker, namenode when running hadoop online.
+Instructions to build mapreduce.jar which contains Sum, Average, JobHandler code needed for the QueryDaemon
+ 
+  ```javac -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d mapreduce_classes CustomInputFormat.java Sum.java Average.java JobHandler.java```
+  ````jar -cvf mapreduce.jar -C mapreduce_classes/ .````
+  
+To test just the JobHandler use it as follows:
+```java -cp $HADOOP_HOME/hadoop-hop-0.2-core.jar:$HADOOP_HOME/lib/commons-logging-1.0.4.jar:mapreduce.jar:. mapreduce.JobHandler sum 5 3``` <br>
+```java -cp $HADOOP_HOME/hadoop-hop-0.2-core.jar:$HADOOP_HOME/lib/commons-logging-1.0.4.jar:mapreduce.jar:. mapreduce.JobHandler average 5 3```
 
-```javac -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar -d query_classes *.java``` <br> 
-```jar -cvf query.jar -C query_classes/ . ```
-
-Instructions to run the QueryDaemon
-
-```hadoop jar query.jar QueryDaemon <port number>```
-
-Instructions to compile and run the TestClient:
-
-```javac TestClient.java``` <br>
-
-```java TestClient <port number that the QueryDaemon uses>``` <br>
-
-      Server: Ready to process query.
-      sum 5 3
-      Server: 1099 99.0
-      sum 2 4
-      
+To test JobHandler with the QueryDaemon check the socket daemon instructions.
