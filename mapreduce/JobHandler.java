@@ -82,12 +82,18 @@ class MapReduceJob extends NotificationThread implements Runnable
 {
     Thread t;
     String input, output;
+    String jobtype;
+    String jobGroupby;
+    String jobColumn;
 
-    public MapReduceJob(String input, String output)
+    public MapReduceJob(String input, String output, String jobtype, String jobGroupby, String jobColumn)
     {
         t = new Thread(this);
         this.input = input;
         this.output = output;
+        this.jobtype = jobtype;
+        this.jobGroupby = jobGroupby;
+        this.jobColumn = jobColumn;
         t.start();
     }
 
@@ -97,9 +103,33 @@ class MapReduceJob extends NotificationThread implements Runnable
         System.out.println("Starting MapReduce Job...");
         try
         {
-            Average job = new Average();
+            if(jobtype.toLowerCase().equals("sum"))
+            {
+                Sum sum_job = new Sum();
+                sum_job.run(input, output, jobGroupby, jobColumn);        
+            }
+            if(jobtype.toLowerCase().equals("average"))
+            {
+                Average avg_job = new Average();
+                avg_job.run(input, output, jobGroupby, jobColumn);
+            }
+            /*switch(jobtype.toLowerCase())
+            {
+               case "sum":
+                     Sum sum_job = new Sum();
+                     sum_job.run(input, output, jobGroupby, jobColumn);        
+                     break;
+               case "average":
+                     Average avg_job = new Average();
+                     avg_job.run(input, output, jobGroupby, jobColumn);
+                     break;
+               default:
+                 System.out.println("Invalid job type " + jobtype);
+            } */
+            //Average job = new Average();
             //Make this generic
-            job.run(input,output,"2","2");
+            //job.run(input,output,"2","2");
+            //job.run(input,output,jobGroupby, jobColumn);
         }
         catch(Exception e)
         {
@@ -126,10 +156,12 @@ class Poll implements Runnable, ThreadCompleteListener
     String mostRecentSnapshot;
     Path snapshotPath;
     FileSystem fs;
+    PrintWriter clientout;
 
-	public Poll(String dirPath, NotificationThread mapReduceThread)
+	public Poll(PrintWriter clientout, String dirPath, NotificationThread mapReduceThread)
 	{
         t = new Thread(this);
+        this.clientout = clientout;
         this.mapReduceThread = mapReduceThread;
         this.mapReduceThread.addListener(this);
         mapReduceComplete = false;
@@ -141,10 +173,14 @@ class Poll implements Runnable, ThreadCompleteListener
 	{
         try{
             Configuration conf = new Configuration();
-            conf.set("fs.defaultFS", "hdfs://localhost:54310/tmp");
-            conf.set("fs.default.name", "hdfs://localhost:54310");
-            conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-site.xml"));
-            conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-default.xml"));
+            //conf.set("fs.defaultFS", "hdfs://localhost:54310/tmp");
+            conf.set("fs.defaultFS", "hdfs://localhost:9000/");
+            //conf.set("fs.default.name", "hdfs://localhost:54310");
+            conf.set("fs.default.name", "hdfs://localhost:9000");
+      //      conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-site.xml"));
+        //    conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-default.xml"));
+            conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-site.xml"));
+            conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-default.xml"));
             fs = FileSystem.get(conf);
             mostRecentSnapshot = null;
             long snapshotTime = -1;
@@ -168,6 +204,25 @@ class Poll implements Runnable, ThreadCompleteListener
                 System.out.println("------------------------------------");
                 System.out.println(mostRecentSnapshot+" "+snapshotTime);
                 System.out.println("------------------------------------");
+                if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot"))
+                {
+                    FSDataInputStream in = fs.open(snapshotPath);
+
+                    byte buffer[] = new byte[1024];
+                    int bytesRead = 0;
+                    while((bytesRead = in.read(buffer)) != -1  )
+                    {
+                       System.out.println(new String(buffer, 0, bytesRead, "UTF-8"));
+                       String raw = new String(buffer, 0, bytesRead, "UTF-8");
+                       String [] result = raw.split("\n");
+                       for(String str: raw.split("\n"))
+                       {
+                         clientout.println(str);
+                       }
+                    }
+
+
+                }
 
             }
             }catch(Exception e){
@@ -186,7 +241,7 @@ class Poll implements Runnable, ThreadCompleteListener
     }
 
     /*String may not be the right data structure to return here*/
-    public Path getSnapshotPath() throws IOException
+    public Path getSnapshotPath() //throws IOException
     {
         return snapshotPath;
     }
@@ -201,11 +256,20 @@ class Poll implements Runnable, ThreadCompleteListener
 
 
 public class JobHandler{
-    
-    public void run(String input, String output) throws InterruptedException
+    public Poll p1;
+
+    public PrintWriter clientout;
+ 
+    public JobHandler(PrintWriter out)
     {
-        MapReduceJob t1 = new MapReduceJob(input, output);
-        Poll p1 = new Poll(output, t1);   
+       this.clientout = out;
+    }
+ 
+    public void run(String input, String output, String jobtype, String jobGroupby, String jobColumn) throws InterruptedException
+    {
+        MapReduceJob t1 = new MapReduceJob(input, output, jobtype, jobGroupby, jobColumn);
+        p1 = new Poll(clientout, output, t1);   
+        System.out.println("Created polling and mapred job");
     }
 
 
@@ -215,10 +279,12 @@ public class JobHandler{
     }
 
     public static void main (String [] args) throws Exception{
-	   String input = "/tmp/input/test.csv";
-       String output = "/tmp/output/average_output";
-       JobHandler job = new JobHandler();
-       job.run(input, output);
+	//   String input = "/tmp/input/test.csv";
+	   String input = "yahoo_data";
+       String output = "average_output";
+       PrintWriter stdout = new PrintWriter(System.out);
+       JobHandler job = new JobHandler(stdout);
+       job.run(input, output,args[0],args[1], args[2] );
     }
 
 }
