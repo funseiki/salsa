@@ -4,6 +4,10 @@
 
 # /webserver/
 
+# /webserver/config
+/webserver/config/development.js
+/webserver/config/production.js
+
 # /webserver/node_modules
 /webserver/node_modules
 
