@@ -10,7 +10,7 @@ var app = express();
 app.set('port', config.server.port);
 app.use(express.static(path.join(__dirname, "ui/public")));
 
-// Endpoint for grabbing information about this server (like its url... which, in retrospect the client should know.. but.. #localhost_problems
+// Endpoint for grabbing information about this server (like its url... which, in retrospect the client should know.. but.. #localhost_problems)
 app.get('/serverinfo', function(req, res) {
     res.json({
         ip: config.server.ip,
