@@ -2,12 +2,21 @@
 <html>
     <head></head>
     <body>
+        <script src="/js/lib/jquery.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>
         <script>
-            var socket = io.connect("http://localhost:8080");
-            socket.on('news', function(data) {
-                console.log(data);
-                socket.emit('pokemon', {pokemon: 'bulbasaur'});
+            function setupSocket(url) {
+                var socket = io.connect(url);
+                socket.on('news', function(data) {
+                    console.log(data);
+                    socket.emit('pokemon', {pokemon: 'bulbasaur'});
+                });
+            }
+            $(document).ready(function() {
+                $.get('/serverinfo', function(data, status, xhr) {
+                    var url = data.ip + ":" + data.port;
+                    setupSocket(url);
+                });
             });
         </script>
     </body>
