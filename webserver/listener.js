@@ -4,13 +4,13 @@
  ****************************************************************************/
 var net = require('net');
 
-var client = net.connect({port: 1234}, function() {
+var client = net.connect({port: 8081}, function() {
     console.log('Client connected');
-    client.write('Hello from the client');
+    client.write('sum 2 2');
 });
 
 client.on('data', function(data) {
-    console.log(data.toString());
+    console.log("Response received: " + data.toString());
     client.end();
 });
 
