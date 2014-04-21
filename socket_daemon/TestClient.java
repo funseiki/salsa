@@ -23,18 +23,36 @@ public class TestClient {
                 new BufferedReader(new InputStreamReader(System.in));
             String fromServer;
             String fromUser;
- 
+            while(true)
+            {
+              fromServer = in.readLine();
+              if(fromServer == null)
+                 continue;
+              if(fromServer.equals("Bye."))
+                break;
+              System.out.println("Server: " + fromServer);
+              if(fromServer.equals("Ready to process query!"))
+              {
+                 fromUser = stdIn.readLine();
+                 System.out.println("Client : " + fromUser);
+                 out.println(fromUser);
+              }
+
+            } 
+            /*
             while ((fromServer = in.readLine()) != null) {
                 System.out.println("Server: " + fromServer);
                 if (fromServer.equals("Bye."))
                     break;
-                 
-                fromUser = stdIn.readLine();
-                if (fromUser != null) {
-                    System.out.println("Client: " + fromUser);
-                    out.println(fromUser);
+                if(!fromServer.toLowerCase().contains("error"))
+                {
+                   fromUser = stdIn.readLine();
+                   if (fromUser != null) {
+                      System.out.println("Client: " + fromUser);
+                      out.println(fromUser);
+                   }
                 }
-            }
+            } */
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);
             System.exit(1);

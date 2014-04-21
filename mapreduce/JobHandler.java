@@ -85,8 +85,9 @@ class MapReduceJob extends NotificationThread implements Runnable
     String jobtype;
     String jobGroupby;
     String jobColumn;
+    PrintWriter clientout;
 
-    public MapReduceJob(String input, String output, String jobtype, String jobGroupby, String jobColumn)
+    public MapReduceJob(String input, String output, String jobtype, String jobGroupby, String jobColumn, PrintWriter clientout)
     {
         t = new Thread(this);
         this.input = input;
@@ -94,6 +95,7 @@ class MapReduceJob extends NotificationThread implements Runnable
         this.jobtype = jobtype;
         this.jobGroupby = jobGroupby;
         this.jobColumn = jobColumn;
+        this.clientout = clientout;
         t.start();
     }
 
@@ -200,15 +202,16 @@ class Poll implements Runnable, ThreadCompleteListener
                         snapshotPath = path;
                     }
                 }
-                }
                 System.out.println("------------------------------------");
                 System.out.println(mostRecentSnapshot+" "+snapshotTime);
                 System.out.println("------------------------------------");
-                if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot"))
+                
+               // } // end for
+               if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot"))
                 {
                     FSDataInputStream in = fs.open(snapshotPath);
 
-                    byte buffer[] = new byte[1024];
+                    byte buffer[] = new byte[2048];
                     int bytesRead = 0;
                     while((bytesRead = in.read(buffer)) != -1  )
                     {
@@ -220,15 +223,14 @@ class Poll implements Runnable, ThreadCompleteListener
                          clientout.println(str);
                        }
                     }
-
-
-                }
-
-            }
+                 } 
+                } // end for 
+              } // map reduce complete
             }catch(Exception e){
 		System.out.println(e);
                 System.out.println("File not found");
             }
+            clientout.println("Ready to process query!");
     }
     public void notifyOfThreadComplete(Runnable runner)
     {
@@ -258,16 +260,28 @@ class Poll implements Runnable, ThreadCompleteListener
 public class JobHandler{
     public Poll p1;
 
+    public MapReduceJob t1;
+
     public PrintWriter clientout;
  
     public JobHandler(PrintWriter out)
     {
        this.clientout = out;
     }
+
+    public void cancelMapReduceJob()
+    {
+
+    }
+
+    public boolean getStatus()
+    {
+       return p1.mapReduceComplete;  
+    }
  
     public void run(String input, String output, String jobtype, String jobGroupby, String jobColumn) throws InterruptedException
     {
-        MapReduceJob t1 = new MapReduceJob(input, output, jobtype, jobGroupby, jobColumn);
+        t1 = new MapReduceJob(input, output, jobtype, jobGroupby, jobColumn, clientout);
         p1 = new Poll(clientout, output, t1);   
         System.out.println("Created polling and mapred job");
     }

@@ -13,8 +13,7 @@ public class QueryDaemon {
         }
  
         int portNumber = Integer.parseInt(args[0]);
-        boolean close_client = false;
- 
+        
         try{ 
             ServerSocket serverSocket = new ServerSocket(portNumber);
             Socket clientSocket = serverSocket.accept();
@@ -24,27 +23,18 @@ public class QueryDaemon {
                 new InputStreamReader(clientSocket.getInputStream()));
          
             String inputLine;
-            List<String> outputLine;
+            //List<String> outputLine;
              
             // Initiate conversation with client
             QueryProtocol qp = new QueryProtocol(out);
-            outputLine = qp.processInput(null);
-            for(String outL : outputLine)
-               out.println(outL);
+            //outputLine = qp.processInput(null);
+            qp.processInput(null);
             
             while ((inputLine = in.readLine()) != null) {
                 System.out.println("Client: " + inputLine);
-                outputLine = qp.processInput(inputLine);
-           /* System.out.println(outputLine);
-                for(String outL : outputLine)
-                {
-                    out.println(outL);
-                    if(out.equals("Bye"))
-                      close_client = true;
-                }
-                //out.println(outputLine);
-                if (close_client == true)
-                    break; */
+                qp.processInput(inputLine);
+                if(inputLine.equalsIgnoreCase("bye"))
+                   break;
             }
         } catch (IOException e) {
             System.out.println("Exception caught when trying to listen on port "

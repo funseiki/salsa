@@ -19,7 +19,8 @@ public class QueryProtocol {
     private static final String USAGE = "Usage: <query op> <groupby attribute column> <operation attribute column>; Ex: sum 5 2";
     private static final String SUM = "sum";
     private static final String AVERAGE = "average";
-    private int state = READY;
+    private static final String INIT_DB = "init_db";
+    public int state = READY;
 
     public PrintWriter clientout;
     
@@ -30,27 +31,26 @@ public class QueryProtocol {
         this.clientout = out;
     }
 
-    public List<String> performMapReduce(String jobtype, String key_i, String col_i)
+    public void cancelQuery()
     {
-        List<String> qresults = new ArrayList();
+       query_job.cancelMapReduceJob();
+    }
+
+    public boolean queryStatus()
+    {
+       return query_job.getStatus();
+    }
+
+    public void performMapReduce(String jobtype, String key_i, String col_i)
+    {
         try {
              query_job = new JobHandler(clientout);
              query_job.run("yahoo_data", "query_out", jobtype, key_i, col_i);
-
              //System.out.println("FINISHED MAP REDUCE");             
-             ReadSnapshot rs = new ReadSnapshot("query_out");
-                qresults = rs.readFile();
-             //System.out.println(qresults);             
-            
-             for(String temp : qresults) 
-             {
-                 System.out.println(temp);
-             }
              
         } catch (Exception e) {
              System.err.println("CAUGHT EXCEPTION: " + e.getMessage());
         }
-        return qresults;
     }
    
     private boolean is_int(String s)
@@ -67,20 +67,20 @@ public class QueryProtocol {
 
     }
 
-    //public List<String> createJob
-    public List<String> processInput(String theInput) {
-        List<String> theOutput = new ArrayList();
+    public void processInput(String theInput) {
+        //List<String> theOutput = new ArrayList();
         if(theInput == null || theInput == "\n")
            {
-               theOutput.add("Ready to process query!");
+               //theOutput.add("Ready to process query!");
+               clientout.println("Ready to process query!");
                state = READY;
-               return theOutput;
+               return;
+               //return theOutput;
            }
         if(theInput.equalsIgnoreCase("bye"))
         {
-             theOutput.add("Bye");
+             clientout.println("Bye.");
              state = READY;
-             return theOutput;
         }
         if (state == READY) {
             if((theInput.toLowerCase().contains(SUM)) || 
@@ -89,31 +89,35 @@ public class QueryProtocol {
               String[] splits = theInput.split(" ");
               if(splits.length != 3)
               {
-                 theOutput.add("Error: Invalid number of parameters");
-                 theOutput.add(USAGE);
-                 return theOutput;
+                 clientout.println("Error: Invalid number of parameters");
+                 clientout.println(USAGE);
               }
               if(is_int(splits[1]) == false || is_int(splits[2]) == false)
               {
-                  theOutput.add("Error: Attribute's column is not a number");
-                  theOutput.add(USAGE);
-                  return theOutput;
+                  clientout.println("Error: Attribute's column is not a number");
+                  clientout.println(USAGE);
               }
               state = PROCESSINGQUERY;
               
-              return performMapReduce(splits[0], splits[1], splits[2]);
+              performMapReduce(splits[0], splits[1], splits[2]);
             }
             else
             {
-               //theOutput.add("Invalid client operation "+ theInput);
-               theOutput.add("Ready to process query!"); 
-               return theOutput;
+               clientout.println("Ready to process query!");
             }
         } else if (state == PROCESSINGQUERY) {
             if(theInput.toLowerCase().contains("cancel"))
-               theOutput.add("Cancelling query");
-            state = READY;
+            {
+               cancelQuery();
+               clientout.println("Cancelling query");
+            }
+            System.out.println("Processing query checking if it is done"); 
+            if(queryStatus() == true)
+            {
+               System.out.println("Query is done " + queryStatus() );
+               state = READY;
+               processInput(theInput);
+            }
         } 
-        return theOutput;
     }
 }
