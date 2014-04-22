@@ -2,10 +2,14 @@ The web server and client code for the salsa project
 
 Usage:
 
-    Start the web server. Listens on port 8080
+    Start the web server. Listens on port 8080 (daemon should be running at this point)
     > node server.js
 
 Build/update:
+    - Do the following once
+        > npm install bower -g (if bower is not installed already)
+        - create a config/development.js file (should match config/template.js)
+            > cp config/template.js config/development.js
 
     - To install front end packages run
         > bower install
