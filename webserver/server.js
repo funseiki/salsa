@@ -1,7 +1,7 @@
 var express = require('express')
     , http = require('http')
     , path = require('path')
-    , client = require('./client-listener')
+    , client = require('./listeners').client
     , config = require('./config');
 
 var app = express();
