@@ -17,3 +17,7 @@ client.on('data', function(data) {
 client.on('end', function() {
     console.log('client disconnected');
 });
+
+client.on('error', function(err) {
+    console.error(err);
+});
