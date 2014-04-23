@@ -4,20 +4,22 @@
  ****************************************************************************/
 var net = require('net');
 
-var client = net.connect({port: 8081}, function() {
-    console.log('Client connected');
-    client.write('sum 2 2');
-});
+exports.listen = function(port){
+    var client = net.connect({port: port}, function() {
+        console.log('Client connected');
+        //client.write('sum 2 2');
+    });
 
-client.on('data', function(data) {
-    console.log("Response received: " + data.toString());
-    client.end();
-});
+    client.on('data', function(data) {
+        console.log("Response received: " + data.toString());
+        client.end();
+    });
 
-client.on('end', function() {
-    console.log('client disconnected');
-});
+    client.on('end', function() {
+        console.log('client disconnected');
+    });
 
-client.on('error', function(err) {
-    console.error(err);
-});
+    client.on('error', function(err) {
+        console.error(err);
+    });
+};
