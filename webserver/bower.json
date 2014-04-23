@@ -17,6 +17,7 @@
   "dependencies": {
       "d3": null,
       "socket.io": null,
-      "jquery": null
+      "jquery": null,
+      "bootstrap": null
   }
 }
