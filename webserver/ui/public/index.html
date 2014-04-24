@@ -10,6 +10,19 @@
                 padding: 3px;
                 margin: 1px;
                 color: white;
+	    }
+
+            body {
+                padding-top: 50px;
+                padding-bottom: 20px;
+            }
+
+            .list-group {
+                max-height: 500px;
+                overflow-y:scroll; 
+            }
+            .btn-group-wrap {
+                text-align: center;
             }
         </style>
     </head>
@@ -17,13 +30,34 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
+                    <ul class="list-group">
+                      <a href="#" class="list-group-item">Attribute 1</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 1</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 1</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                      <a href="#" class="list-group-item">Attribute 2</a>
+                    </ul>
+                </div>
+                <div class="col-md-6">
                     <div class="row">
-                        <p>Attributes</p>
+                        <div class="btn-group-wrap">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default">Sum</button>
+                                <button type="button" class="btn btn-default">Average</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="row">
-                        Item 1
-                    </div>
-                    <div class="row">
+                    <div class="row" id="chart">
                         Item 2
                     </div>
                 </div>
