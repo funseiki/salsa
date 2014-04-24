@@ -1,4 +1,8 @@
 // Helper method for getting attributes
+socket.on("attributes",function(data) {
+    
+});
+
 function getAttributes(callback) {
     // we're getting attributes....
     // TODO: Use socket.io or a GET request to asynchronously grab attributes
