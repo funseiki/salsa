@@ -4,6 +4,11 @@ function setupSocket(url, callbacks) {
         console.log(data);
         socket.emit('pokemon', {pokemon: 'bulbasaur'});
     });
+
+    $.each(callbacks, function(index, callback) {
+        // Free sockets!
+        callback(socket);
+    });
 }
 
 function setupViz() {
@@ -21,7 +26,7 @@ function setupViz() {
 $(document).ready(function() {
     $.get('/serverinfo', function(data, status, xhr) {
         var url = data.ip + ":" + data.port;
-        setupSocket(url, []);
+        setupSocket(url, [guiSetup]);
         setupViz();
     });
 });
