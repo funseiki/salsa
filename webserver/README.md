@@ -7,6 +7,13 @@ The web server and client code for the salsa project
     > node server.js
 
 ##Build/update:
+    - For Ubuntu users try the following to get the latest version of nodejs and npm
+        - http://stackoverflow.com/a/18564798/865883
+        “””
+            sudo add-apt-repository ppa:chris-lea/node.js
+            sudo apt-get update
+            sudo apt-get install nodejs -y # newer nodejs package includes npm
+        “””
 
     - Do the following once
         > npm install bower -g (if bower is not installed already)
