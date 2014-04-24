@@ -1,18 +1,7 @@
 // Helper method for getting attributes
 //Wrap everything in a function - guiSetup
 
-function guiInput(socket) {
-    socket.on("attributes",function(data) {
-
-    });
-
-    function getAttributes(callback) {
-        // we're getting attributes....
-        // TODO: Use socket.io or a GET request to asynchronously grab attributes
-        var attributes = ['one', 'two', 'three'];
-        callback(attributes);
-    }
-
+function guiSetup(socket) {
     var attributeCallback = function(attributes) {
         console.log("these are the attributes:", attributes);
 
@@ -21,6 +10,6 @@ function guiInput(socket) {
         }
     };
 
-    getAttributes(attributeCallback);
+    // Get the attributes
+    socket.on("attributes", attributeCallback);
 }
-    
