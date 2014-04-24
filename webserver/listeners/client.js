@@ -11,6 +11,7 @@ exports.listen = function(server) {
         socket.on('pokemon', function(data) {
             console.log(data);
         });
+        socket.emit('attributes', ['attr1', 'attr2', 'att3']);
     });
 
     return server;
