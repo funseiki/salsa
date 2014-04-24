@@ -207,6 +207,7 @@ class Poll implements Runnable, ThreadCompleteListener
                 System.out.println("------------------------------------");
                 
                // } // end for
+	       //New snapshot need not be generated every 3s
                if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot"))
                 {
                     FSDataInputStream in = fs.open(snapshotPath);
