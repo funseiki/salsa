@@ -7,6 +7,12 @@ Map Reduce program for sum queries
 */
 
 package mapreduce;
+
+// needed to calculate the confidence interval
+import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.*;
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
  
 import java.io.IOException;  
 import java.util.*;  
@@ -21,6 +27,7 @@ import org.apache.hadoop.util.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -35,10 +42,10 @@ import org.apache.hadoop.util.Progressable;
 
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 
-class Map extends MapReduceBase implements Mapper<Text, Text, Text, FloatWritable> {   
+class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {   
        private Text word = new Text();  
 
-       public void map(Text key, Text value, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {   
+       public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {   
            String line = value.toString(); 
            String index = key.toString();
 
@@ -52,12 +59,14 @@ class Map extends MapReduceBase implements Mapper<Text, Text, Text, FloatWritabl
               word.set(tokens[key_index].trim());
            else
               word.set("");
-           FloatWritable value_sum = new FloatWritable();
+           DoubleWritable  value_sum = new DoubleWritable();
            if(value_index != -1)
                value_sum.set(Integer.parseInt(tokens[value_index]));   
            else
                value_sum.set(1);
-           output.collect(word, value_sum);  
+           Text val = new Text(); 
+           val.set(tokens[value_index].trim());
+           output.collect(word, val);  
       }  
 }
 
@@ -80,13 +89,13 @@ public class Sum{
         conf.set("fs.default.name", "hdfs://localhost:9000");
         conf.setJobName(index);  
         conf.setOutputKeyClass(Text.class);  
-        conf.setOutputValueClass(FloatWritable.class);  
+        conf.setOutputValueClass(Text.class);  
 
         // Select the map class which belongs to the certain column
         conf.setMapperClass(Map.class);  
 
-        conf.setCombinerClass(Reduce.class);  
-        conf.setReducerClass(Reduce.class);  
+        //conf.setCombinerClass(ConfReduce.class);  
+        conf.setReducerClass(ConfReduce.class);  
  
         conf.setInputFormat(CustomInputFormat.class);  
 
@@ -100,16 +109,24 @@ public class Sum{
         Path out = new Path(outputPath);
         FileSystem fs = FileSystem.get(conf);
         fs.delete(out, true);
+        
+        DistributedCache.addFileToClassPath(new Path("/lib/commons-math3-3.2.jar"), conf); //, fs);
         FileOutputFormat.setOutputPath(conf, new Path(outputPath));  
 
          FileInputFormat.addInputPath(conf, new Path(inputPath));
          
-         conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.10"));
+         conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.01"));
          conf.setBoolean("mapred.map.pipeline", true);
          JobClient client = new JobClient(conf);
          //client.submitJob(conf);
          client.runJob(conf);
-         //RunningJob rjob = client.submitJob(conf);
+
+         /* 
+         RunningJob rjob = client.submitJob(conf);
+         while(rjob.isComplete() != true)
+         {
+
+         } */
          //client.report(rjob, conf);
 
          //JobID jobid = rjob.getID();
@@ -125,8 +142,59 @@ public class Sum{
           sum = sum + values.next().get();
         }  
         output.collect(key, new FloatWritable(sum));  
+        System.out.println("key " + key + " sum: " + sum);
       }  
     }  
+
+     public static class ConfReduce extends MapReduceBase implements Reducer<Text, Text, Text, Text> {   
+       public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {   
+       double sum = 0;  
+       int num_vals = 0;
+        
+       SummaryStatistics stats = new SummaryStatistics();
+        while (values.hasNext()) { 
+          String[] str = values.next().toString().split(",");; 
+          double val = Double.parseDouble(str[0]);
+          //sum = sum + values.next().get();
+          sum = sum + val;
+          num_vals++;
+          stats.addValue(val);
+          System.out.println("n= " + num_vals + " val= " + val);
+        }  
+       
+        //Calculate 95% confidence interval
+        double ConfInter;
+        if(num_vals > 1)
+          ConfInter = calcMeanCI(stats, 0.95);
+        else
+          ConfInter = 0;
+        StringBuilder outpt = new StringBuilder();
+        outpt.append(sum);
+        outpt.append(", ");
+        outpt.append(ConfInter);
+        Text out = new Text();
+        out.set(outpt.toString());
+        System.out.println("key: " + key + " sum: " + sum + " conf:" + ConfInter);
+        output.collect(key, out);
+      }  
+ 
+      public double calcMeanCI(SummaryStatistics stats, double level)
+      {
+    //      try {
+     {       // Create T Distribution with N-1 degrees of freedom
+            TDistribution tDist = new TDistribution(stats.getN() - 1);
+            // Calculate critical value
+            double critVal = tDist.inverseCumulativeProbability(1.0 - (1 - level) / 2);
+            // Calculate confidence interval
+            return critVal * stats.getStandardDeviation() / Math.sqrt(stats.getN());
+  //            } catch (OutOfRangeException e) {
+ //MathIllegalArgumentException e) {
+                  // System.out.println("Exception in calcMean " + e);
+                   // return Double.NaN;
+            }
+       }
+    } // end Reduce class  
+  
   
  }  
  

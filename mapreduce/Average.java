@@ -9,11 +9,15 @@ import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.*;
 import org.apache.hadoop.util.*;
 
+// needed to calculate the confidence interval
+import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 public class Average {
 
 
-public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, FloatWritable> {
+public static class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text> {
     private FloatWritable outputValue = new FloatWritable();
     private Text outputKey = new Text();
 
@@ -25,7 +29,7 @@ public static class Map extends MapReduceBase implements Mapper<LongWritable, Te
          column = job.getInt("column",-1);
          
     }
-    public void map(LongWritable key, Text value, OutputCollector<Text, FloatWritable> output, Reporter reporter) throws IOException {
+    public void map(LongWritable key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
         System.out.println(key);
         String line = value.toString();
         String[] fields = line.split(",");
@@ -34,10 +38,13 @@ public static class Map extends MapReduceBase implements Mapper<LongWritable, Te
         else
             outputKey.set("");
         if(column != -1)
+            //outputValue.set(Float.parseFloat(fields[column]));
             outputValue.set(Float.parseFloat(fields[column]));
         else
             outputValue.set(0f);
-        output.collect(outputKey, outputValue);
+        Text val = new Text();
+        val.set(fields[column].trim());
+        output.collect(outputKey, val);
         }
     }
  
@@ -59,6 +66,66 @@ IOException {
 
  }
 
+ public static class ConfReduce extends MapReduceBase implements Reducer<Text, Text, Text, Text> {
+       public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {
+       double sum = 0;
+       int num_vals = 0;
+    
+       SummaryStatistics stats = new SummaryStatistics();
+        while (values.hasNext()) {
+          String[] str = values.next().toString().split(",");;
+          double val = Double.parseDouble(str[0]);
+          //sum = sum + values.next().get();
+          sum = sum + val;
+          num_vals++;
+          stats.addValue(val);
+          System.out.println("n= " + num_vals + " val= " + val);
+        }
+    
+        //Calculate 95% confidence interval
+        double ConfInter;
+        if(num_vals > 1)
+          ConfInter = calcMeanCI(stats, 0.95);
+        else
+          ConfInter = 0;
+        double average = sum / num_vals;
+        StringBuilder outpt = new StringBuilder();
+        outpt.append(average);
+        outpt.append(", ");
+        outpt.append(num_vals);
+        outpt.append(", ");
+        outpt.append(ConfInter);
+        Text out = new Text();
+        out.set(outpt.toString());
+        System.out.println("key: " + key + " average: " + average + " conf:" + ConfInter);
+        output.collect(key, out);
+
+        // Write to HDFS directly
+        Configuration confr = new Configuration();
+        FileSystem fs = FileSystem.get(confr);
+        FSDataOutputStream dos = fs.create(new Path("/user/tmp"), true); 
+        dos.writeChars(outpt.toString());
+        dos.close();
+      }
+
+      public double calcMeanCI(SummaryStatistics stats, double level)
+      {
+    //      try {
+     {       // Create T Distribution with N-1 degrees of freedom
+            TDistribution tDist = new TDistribution(stats.getN() - 1);
+            // Calculate critical value
+            double critVal = tDist.inverseCumulativeProbability(1.0 - (1 - level) / 2);
+            // Calculate confidence interval
+            return critVal * stats.getStandardDeviation() / Math.sqrt(stats.getN());
+//            } catch (OutOfRangeException e) {
+ //MathIllegalArgumentException e) {
+                  // System.out.println("Exception in calcMean " + e);
+                   // return Double.NaN;
+            }
+       }
+    } // end Reduce class
+ 
+
 
     public void run(String inputPath, String outputPath, String key_index, String value_index) throws Exception
     {
@@ -76,10 +143,10 @@ IOException {
         conf.setInt("column",column);
 
         conf.setOutputKeyClass(Text.class);
-        conf.setOutputValueClass(FloatWritable.class);
+        conf.setOutputValueClass(Text.class);
 
         conf.setMapperClass(Map.class);
-        conf.setReducerClass(Reduce.class);
+        conf.setReducerClass(ConfReduce.class);
 
         conf.setInputFormat(TextInputFormat.class);
         conf.set("mapred.textoutputformat.separator",",");
@@ -88,7 +155,8 @@ IOException {
         //FileInputFormat.setInputPaths(conf, new Path(inputPath));
         //FileOutputFormat.setOutputPath(conf, new Path(outputPath));
 
-        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.10"));
+        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.3"));
+        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.2"));
         conf.setBoolean("mapred.map.pipeline", true);
         //Average.column = 2;
 
