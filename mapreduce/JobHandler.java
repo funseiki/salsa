@@ -85,9 +85,10 @@ class MapReduceJob extends NotificationThread implements Runnable
     String jobtype;
     String jobGroupby;
     String jobColumn;
-    PrintWriter clientout;
+    Sum sum_job;
+    Average avg_job;
 
-    public MapReduceJob(String input, String output, String jobtype, String jobGroupby, String jobColumn, PrintWriter clientout)
+    public MapReduceJob(String input, String output, String jobtype, String jobGroupby, String jobColumn)
     {
         t = new Thread(this);
         this.input = input;
@@ -95,8 +96,12 @@ class MapReduceJob extends NotificationThread implements Runnable
         this.jobtype = jobtype;
         this.jobGroupby = jobGroupby;
         this.jobColumn = jobColumn;
-        this.clientout = clientout;
         t.start();
+    }
+
+    public void stopJob()
+    {
+        
     }
 
     public void startJob()
@@ -107,31 +112,14 @@ class MapReduceJob extends NotificationThread implements Runnable
         {
             if(jobtype.toLowerCase().equals("sum"))
             {
-                Sum sum_job = new Sum();
+                sum_job = new Sum();
                 sum_job.run(input, output, jobGroupby, jobColumn);        
             }
             if(jobtype.toLowerCase().equals("average"))
             {
-                Average avg_job = new Average();
+                avg_job = new Average();
                 avg_job.run(input, output, jobGroupby, jobColumn);
             }
-            /*switch(jobtype.toLowerCase())
-            {
-               case "sum":
-                     Sum sum_job = new Sum();
-                     sum_job.run(input, output, jobGroupby, jobColumn);        
-                     break;
-               case "average":
-                     Average avg_job = new Average();
-                     avg_job.run(input, output, jobGroupby, jobColumn);
-                     break;
-               default:
-                 System.out.println("Invalid job type " + jobtype);
-            } */
-            //Average job = new Average();
-            //Make this generic
-            //job.run(input,output,"2","2");
-            //job.run(input,output,jobGroupby, jobColumn);
         }
         catch(Exception e)
         {
@@ -272,6 +260,8 @@ public class JobHandler{
 
     public void cancelMapReduceJob()
     {
+ 
+        t1.t.interrupt();
 
     }
 
@@ -282,7 +272,7 @@ public class JobHandler{
  
     public void run(String input, String output, String jobtype, String jobGroupby, String jobColumn) throws InterruptedException
     {
-        t1 = new MapReduceJob(input, output, jobtype, jobGroupby, jobColumn, clientout);
+        t1 = new MapReduceJob(input, output, jobtype, jobGroupby, jobColumn);
         p1 = new Poll(clientout, output, t1);   
         System.out.println("Created polling and mapred job");
     }
