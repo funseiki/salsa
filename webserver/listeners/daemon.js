@@ -9,11 +9,10 @@ var net = require('net'),
 function DaemonListener() {
     EventEmitter.call(this);
 }
-
 util.inherits(DaemonListener, EventEmitter);
 
 // Thin wrapper around 'net' object
-DaemonListener.prototype = {
+var DaemonProto = {
     state: null,
     result: null,
     client: null,
@@ -75,5 +74,10 @@ DaemonListener.prototype = {
         }
     }
 };
+
+// Prototype should not overwrite EventEmitter attributes
+for(var attribute in DaemonProto) {
+    DaemonListener.prototype[attribute] = DaemonProto[attribute];
+}
 
 module.exports = DaemonListener;

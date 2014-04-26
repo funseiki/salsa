@@ -3,7 +3,8 @@
  *  Messages from the client will be relayed to the daemon listener
  ****************************************************************************/
 var socketio = require("socket.io"),
-    daemon = new require("./daemon")();
+    DaemonListener = require("./daemon");
+var daemon = new DaemonListener();
 
 exports.listen = function(server, daemonPort) {
     var io = socketio.listen(server);
