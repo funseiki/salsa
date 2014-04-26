@@ -9,7 +9,9 @@ var server = net.createServer(function(socket) {
     console.log('Client connection received');
 });
 
-server.listen(1234, function() {
+var port = process.argv[2] ? process.argv[2] : '8081';
+
+server.listen(port, function() {
     var address = server.address();
     console.log("Opened a server on %j", address);
 });
