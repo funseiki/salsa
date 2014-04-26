@@ -54,7 +54,7 @@ var DaemonProto = {
         });
         this.client.on('data', function(data) {
             // Parse the response we've received to see if we should emit anything
-            that.parseResponse(data);
+            that.parseResponse(data.toString());
         });
         this.client.on('end', function(data) {
             that.emit('end', data);
