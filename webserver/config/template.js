@@ -5,5 +5,8 @@ module.exports = {
     server: {
         ip: 'http://127.0.0.1',
         port: '80'
+    },
+    daemon: {
+        port: '8081'
     }
 };

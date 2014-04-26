@@ -26,7 +26,7 @@ app.get("/", function(req, res) {
 var server = http.createServer(app);
 
 // Start the client
-client.listen(server);
+client.listen(server, config.daemon.port);
 server.listen(app.get('port'), function() {
     console.log("Express server listening on", app.get('port'));
 });
