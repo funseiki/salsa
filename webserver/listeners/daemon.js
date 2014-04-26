@@ -67,6 +67,11 @@ DaemonListener.prototype = {
         if(client && this.state == "READY") {
             // Should only allow writes if we're there are no jobs being sent already
             client.write(dataString);
+            return true;
+        }
+        else {
+            // Notify the client that we cannot perform a query yet
+            return false;
         }
     }
 };

@@ -12,9 +12,16 @@ exports.listen = function(server, daemonPort) {
         daemon.listen(daemonPort);
 
         // The daemon API
-        daemon.on('data', function(data) {
+        daemon.on('snapshot', function(data) {
             console.log("Response received: " + data.toString());
-            daemon.end();
+            // Send the snapshot result to all connected clients
+            io.sockets.emit('snapshot', {'data': data});
+        });
+
+        daemon.on('result', function(data) {
+            console.log("Response received: " + data.toString());
+            // Send the snapshot result to all connected clients
+            io.sockets.emit('result', {'data': data});
         });
 
         daemon.on('end', function() {
@@ -23,23 +30,40 @@ exports.listen = function(server, daemonPort) {
 
         daemon.on('error', function(err) {
             console.error(err);
+            io.sockets.emit('error');
         });
 
-        daemon.on("data", function(data) {
-            console.log(data);
+        // Notify clients that the data is still being processed
+        daemon.on('processing', function() {
+            io.sockets.emit('processing');
         });
     }
 
     io.sockets.on('connection', function(socket) {
-        // The client API
-        socket.emit('news', {hello: 'world'});
-
-        socket.on('query', function(query) {
-            console.log(data);
-            // TODO: First make sure we're not already sending a query
-            daemon.write(query);
+        socket.on('query', function(queryParams) {
+            var query = null;
+            switch(queryParams.type) {
+                case 'SUM':
+                case 'AVERAGE':
+                    var groupBy = -1;
+                    if(queryParams.groupBy) {
+                        groupBy = queryParams.groupBy;
+                    }
+                    query = queryParams.type + " " + queryParams.column + " " + groupBy;
+                    break;
+                case 'InitDB': {
+                    query = 'InitDB';
+                }
+            }
+            if(!query) {
+                // The query was not formatted correctly
+                socket.emit('bad_format');
+            }
+            else if(!daemon.write(query)) {
+                // Notify the socket that the query was not accepted
+                socket.emit('processing');
+            }
         });
-        socket.emit('attributes', ['attr1', 'attr2', 'att3']);
     });
 
     return server;
