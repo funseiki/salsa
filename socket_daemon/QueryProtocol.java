@@ -45,7 +45,7 @@ public class QueryProtocol {
     {
         try {
              query_job = new JobHandler(clientout);
-             query_job.run("yahoo_data", "query_out", jobtype, key_i, col_i);
+             query_job.run("/yahoo_data/", "/query_out", jobtype, key_i, col_i);
              //System.out.println("FINISHED MAP REDUCE");             
              
         } catch (Exception e) {
@@ -99,7 +99,7 @@ public class QueryProtocol {
               }
               state = PROCESSINGQUERY;
               
-              performMapReduce(splits[0], splits[1], splits[2]);
+              performMapReduce(splits[0], splits[2], splits[1]);
             }
             else
             {
@@ -117,6 +117,10 @@ public class QueryProtocol {
                System.out.println("Query is done " + queryStatus() );
                state = READY;
                processInput(theInput);
+            }
+            else
+            {
+               clientout.println("PROCESSING QUERY");
             }
         } 
     }
