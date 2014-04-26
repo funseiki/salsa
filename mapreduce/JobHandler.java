@@ -155,7 +155,8 @@ class Poll implements Runnable, ThreadCompleteListener
         this.mapReduceThread = mapReduceThread;
         this.mapReduceThread.addListener(this);
         mapReduceComplete = false;
-    	this.dirPath = dirPath;
+    	//this.dirPath = dirPath;
+        this.dirPath = "/tmp";
         t.start();
 	}
 
@@ -172,6 +173,7 @@ class Poll implements Runnable, ThreadCompleteListener
             conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-site.xml"));
             conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-default.xml"));
             fs = FileSystem.get(conf);
+            clientout.println("START_RESULT");
             mostRecentSnapshot = null;
             long snapshotTime = -1;
             while(!mapReduceComplete)
@@ -181,7 +183,8 @@ class Poll implements Runnable, ThreadCompleteListener
                 for (int i=0;i<status.length;i++){
                 Path path = status[i].getPath();
                 String fileName = path.getName();
-                if(fileName.contains("snapshot"))
+                //if(fileName.contains("snapshot"))
+                if(fileName.contains("tmp"))
                 {
                     if(mostRecentSnapshot == null || status[i].getModificationTime() > snapshotTime)
                     {
@@ -195,11 +198,11 @@ class Poll implements Runnable, ThreadCompleteListener
                 System.out.println("------------------------------------");
                 
                // } // end for
-	       //New snapshot need not be generated every 3s
-               if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot"))
+               //if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot"))
+               if(mostRecentSnapshot != null && mostRecentSnapshot.contains("tmp"))
                 {
                     FSDataInputStream in = fs.open(snapshotPath);
-
+                    clientout.println("START_SNAPSHOT");
                     byte buffer[] = new byte[2048];
                     int bytesRead = 0;
                     while((bytesRead = in.read(buffer)) != -1  )
@@ -212,6 +215,7 @@ class Poll implements Runnable, ThreadCompleteListener
                          clientout.println(str);
                        }
                     }
+                    clientout.println("END_SNAPSHOT");
                  } 
                 } // end for 
               } // map reduce complete
@@ -219,6 +223,7 @@ class Poll implements Runnable, ThreadCompleteListener
 		System.out.println(e);
                 System.out.println("File not found");
             }
+            clientout.println("END_RESULT");
             clientout.println("Ready to process query!");
     }
     public void notifyOfThreadComplete(Runnable runner)
@@ -285,7 +290,7 @@ public class JobHandler{
 
     public static void main (String [] args) throws Exception{
 	//   String input = "/tmp/input/test.csv";
-	   String input = "yahoo_data";
+	   String input = "/yahoo_data/part-r-00000";
        String output = "average_output";
        PrintWriter stdout = new PrintWriter(System.out);
        JobHandler job = new JobHandler(stdout);
