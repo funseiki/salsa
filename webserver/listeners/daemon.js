@@ -14,18 +14,47 @@ util.inherits(DaemonListener, EventEmitter);
 
 // Thin wrapper around 'net' object
 DaemonListener.prototype = {
-    listening: false,
+    state: null,
+    result: null,
     client: null,
+    clearResult: function() {
+        this.result = "";
+    },
+    updateResult: function(newLine) {
+        result += newLine;
+    },
+    parseResponse: function(response) {
+        switch(response) {
+            case "START_SNAPSHOT":
+            case "START_RESULT":
+                // Clear out the result if we're just starting to read our stream
+                this.clearResult();
+                this.state=response;
+                break;
+            case "END_SNAPSHOT":
+                this.emit('snapshot', this.result);
+                this.state = response;
+                break;
+            case "END_RESULT":
+                this.emit('result', this.result);
+                this.state="READY";
+                break;
+            case "PROCESSING_QUERY":
+                break;
+            default: // Data
+                updateResult(response);
+                break;
+        }
+    },
     listen: function(port) {
         var that = this;
         this.client = net.connect({port: port}, function() {
             console.log('Client connected');
-            that.listening = true;
+            that.state = "READY";
         });
-
-        // Todo: Wrap all this events to higher level methods
         this.client.on('data', function(data) {
-            that.emit('data', data);
+            // Parse the response we've received to see if we should emit anything
+            that.parseResponse(data);
         });
         this.client.on('end', function(data) {
             that.emit('end', data);
@@ -34,8 +63,9 @@ DaemonListener.prototype = {
             that.emit('error', data);
         });
     },
-    write: function(dataString){
-        if(client) {
+    write: function(dataString) {
+        if(client && this.state == "READY") {
+            // Should only allow writes if we're there are no jobs being sent already
             client.write(dataString);
         }
     }
