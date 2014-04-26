@@ -20,9 +20,10 @@ var DaemonProto = {
         this.result = "";
     },
     updateResult: function(newLine) {
-        result += newLine;
+        this.result += newLine;
     },
     parseResponse: function(response) {
+        console.log("Received response", response);
         switch(response) {
             case "START_SNAPSHOT":
             case "START_RESULT":
@@ -41,7 +42,7 @@ var DaemonProto = {
             case "PROCESSING_QUERY":
                 break;
             default: // Data
-                updateResult(response);
+                this.updateResult(response);
                 break;
         }
     },
