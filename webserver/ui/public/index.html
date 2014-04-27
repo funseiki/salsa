@@ -12,10 +12,19 @@
             </div>
             <!-- Aggregation Methods -->
             <div class="row">
-                <div class="btn-group-wrap">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default">Sum</button>
-                        <button type="button" class="btn btn-default">Average</button>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div id="query" class="col-xs-4" >Query</div>
+                        <div id="column" class="col-xs-4" >Column</div>
+                        <div id="groupBy" class="col-xs-4" >Group By</div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="btn-group-wrap">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default queryButton" data-type='SUM'>Sum</button>
+                            <button type="button" class="btn btn-default queryButton" data-type='AVERAGE'>Average</button>
+                        </div>
                     </div>
                 </div>
             </div>
