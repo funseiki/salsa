@@ -17,6 +17,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import java.io.IOException;  
 import java.util.*;  
 import java.io.*;
+import java.net.*;
  
 import org.apache.hadoop.fs.Path;  
 import org.apache.hadoop.conf.*;  
@@ -99,7 +100,7 @@ public class Sum{
  
         conf.setInputFormat(CustomInputFormat.class);  
 
-        conf.set("mapred.textoutputformat.separator", ", ");
+        conf.set("mapred.textoutputformat.separator", ",");
         conf.setOutputFormat(TextOutputFormat.class); 
  
         // To read from a compressed file
@@ -110,12 +111,12 @@ public class Sum{
         FileSystem fs = FileSystem.get(conf);
         fs.delete(out, true);
         
-        DistributedCache.addFileToClassPath(new Path("/lib/commons-math3-3.2.jar"), conf); //, fs);
+        //DistributedCache.addFileToClassPath(new Path("/lib/commons-math3-3.2.jar"), conf); //, fs);
         FileOutputFormat.setOutputPath(conf, new Path(outputPath));  
 
          FileInputFormat.addInputPath(conf, new Path(inputPath));
          
-         conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.01"));
+         conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.10"));
          conf.setBoolean("mapred.map.pipeline", true);
          JobClient client = new JobClient(conf);
          //client.submitJob(conf);
@@ -168,9 +169,12 @@ public class Sum{
           ConfInter = calcMeanCI(stats, 0.95);
         else
           ConfInter = 0;
+        ConfInter = ConfInter * num_vals;
         StringBuilder outpt = new StringBuilder();
         outpt.append(sum);
-        outpt.append(", ");
+        outpt.append(",");
+        outpt.append(num_vals);
+        outpt.append(",");
         outpt.append(ConfInter);
         Text out = new Text();
         out.set(outpt.toString());
