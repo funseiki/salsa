@@ -43,30 +43,40 @@ import org.apache.hadoop.util.Progressable;
 
 import org.apache.hadoop.io.compress.CompressionCodecFactory;
 
-class Map extends MapReduceBase implements Mapper<Text, Text, Text, Text> {   
+class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text> {   
        private Text word = new Text();  
 
-       public void map(Text key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {   
+       public int column;
+       public int group_by;
+
+      public void configure(JobConf job) {
+         group_by = job.getInt("group_by",-1);
+         column = job.getInt("column",-1);
+       }
+
+       public void map(LongWritable key, Text value, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {   
            String line = value.toString(); 
            String index = key.toString();
 
            String delims = "[,]";
-           String[] indexes = index.split(delims);
            String[] tokens = line.split(delims);
+           System.out.println("Sum on column " + column + " groupby " + group_by);
 	   //word.set(tokens[5].trim());
-           int key_index = Integer.parseInt(indexes[0]);
-           int value_index = Integer.parseInt(indexes[1]);
-           if(key_index != -1)
-              word.set(tokens[key_index].trim());
+           if(group_by != -1)
+              word.set(tokens[group_by].trim());
            else
               word.set("");
-           DoubleWritable  value_sum = new DoubleWritable();
-           if(value_index != -1)
-               value_sum.set(Integer.parseInt(tokens[value_index]));   
+           /*DoubleWritable  value_sum = new DoubleWritable();
+           if(column != -1)
+               value_sum.set(Integer.parseInt(tokens[column]));   
            else
                value_sum.set(1);
+           */
            Text val = new Text(); 
-           val.set(tokens[value_index].trim());
+           if(column != -1)
+              val.set(tokens[column].trim());
+           else
+              val.set("0");
            output.collect(word, val);  
       }  
 }
@@ -81,14 +91,19 @@ public class Sum{
      }
 
      public void run(String inputPath, String outputPath, String key_index, String value_index) throws Exception {      
-        String index = key_index + ","+value_index;
-        System.out.println("Column indexes are " + index);
+        System.out.println("Group by " + key_index + " sum column " + value_index);
 
         JobConf conf = new JobConf(Sum.class);   
         conf.set("mapred.job.tracker", "localhost:9001");
         //conf.set("fs.default.name", "hdfs://localhost:54310");
         conf.set("fs.default.name", "hdfs://localhost:9000");
-        conf.setJobName(index);  
+        conf.setJobName("Sum");  
+
+        int group_by = Integer.parseInt(key_index);
+        conf.setInt("group_by",group_by);
+        int column = Integer.parseInt(value_index);
+        conf.setInt("column",column);
+
         conf.setOutputKeyClass(Text.class);  
         conf.setOutputValueClass(Text.class);  
 
@@ -98,7 +113,7 @@ public class Sum{
         //conf.setCombinerClass(ConfReduce.class);  
         conf.setReducerClass(ConfReduce.class);  
  
-        conf.setInputFormat(CustomInputFormat.class);  
+        conf.setInputFormat(TextInputFormat.class);  
 
         conf.set("mapred.textoutputformat.separator", ",");
         conf.setOutputFormat(TextOutputFormat.class); 
