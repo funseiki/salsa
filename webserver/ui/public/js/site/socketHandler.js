@@ -14,17 +14,22 @@ var socketHandler = {
 
         socket.on('result', function(results) {
             console.log(results);
+
+            // Split by line breaks and make sure no elements are
+            var data = results.data.split("\n")
+                .filter(function(value) { return value.length > 0; });
+
             switch(that.state) {
                 case 'SUM':
                 case 'AVERAGE':
-                    visualizer.update(results.data);
+                    visualizer.update(data);
                     visualizer.done();
                     break;
                 case 'ATTRIBUTE_LIST':
-                    guiBuilder.buildAttributeList(results.data);
+                    guiBuilder.buildAttributeList(data);
                     break;
                 case 'TUPLES':
-                    guiBuilder.buildTupleList(results.data);
+                    guiBuilder.buildTupleList(data);
                     break;
                 default:
                     break;
