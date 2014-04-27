@@ -47,6 +47,7 @@ var uiListener = {
             name: target.html(),
             columnNumber: target.data('column')
         };
+        $('#' + parameter).html(this.params[parameter].name);
     },
     deselectAttributes: function(parameter) {
         $('.attribute').removeClass(this.classNameFromParameter(parameter));
@@ -61,6 +62,7 @@ var uiListener = {
         // Deselect any other attributes that may have been selected
         $('.attribute').removeClass(className);
         this.params[this.parameterFromClassName(className)] = null;
+        $('#' + this.parameterFromClassName(className)).html("");
         return className;
     },
     eventListeners: function() {
@@ -77,7 +79,21 @@ var uiListener = {
                     that.selectAttribute($(event.target), 'column');
                 }
             }
-            console.log(that.params);
+        });
+
+        $('.queryButton').click(function(event) {
+            that.query = $(event.target).data('type');
+            $('.queryButton').removeClass('btn-primary');
+            $(event.target).addClass('btn-primary');
+            $('#query').html(that.query);
+            if(that.params.column)
+            {
+                var queryParams = {type: that.query, column: that.params.column.columnNumber};
+                if(that.params.groupBy) {
+                    queryParams.groupBy = that.params.groupBy.columnNumber;
+                }
+                socketHandler.query(queryParams);
+            }
         });
     }
 }
