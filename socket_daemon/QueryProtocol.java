@@ -92,7 +92,7 @@ public class QueryProtocol {
         FSDataInputStream in = fs.open(path);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         String line;
-        clientout.println("START_ATTRIBUTE");
+        clientout.println("START_RESULT");
             line = br.readLine();
             while(line != null)  
             {
@@ -101,7 +101,7 @@ public class QueryProtocol {
             }
            br.close();
            in.close();
-        clientout.println("END_ATTRIBUTE");
+        clientout.println("END_RESULT");
         }catch(Exception e)
         {
             System.err.println("Exception in SendClientAttrList " + e);
@@ -131,7 +131,7 @@ public class QueryProtocol {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         String line;
         //try{
-        clientout.println("START_TUPLES");
+        clientout.println("START_RESULT");
             line = br.readLine();
             while(line != null && i < num_tuples)  
             {
@@ -141,7 +141,7 @@ public class QueryProtocol {
             }
            br.close();
            in.close();
-        clientout.println("END_TUPLES");
+        clientout.println("END_RESULT");
         }catch(Exception e)
         {
             System.err.println("Exception in SendClienDBTuples " + e);
