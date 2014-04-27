@@ -37,13 +37,17 @@ public static class Map extends MapReduceBase implements Mapper<LongWritable, Te
             outputKey.set(fields[group_by]);
         else
             outputKey.set("");
-        if(column != -1)
+        /*if(column != -1)
             //outputValue.set(Float.parseFloat(fields[column]));
             outputValue.set(Float.parseFloat(fields[column]));
         else
             outputValue.set(0f);
+        */
         Text val = new Text();
-        val.set(fields[column].trim());
+        if(column != -1)
+           val.set(fields[column].trim());
+        else 
+           val.set("0");
         output.collect(outputKey, val);
         }
     }
