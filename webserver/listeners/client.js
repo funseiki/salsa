@@ -20,7 +20,6 @@ exports.listen = function(server, daemonPort) {
         });
 
         daemon.on('result', function(data) {
-            console.log("Response received: " + data.toString());
             // Send the snapshot result to all connected clients
             io.sockets.emit('result', {'data': data});
         });
@@ -36,7 +35,7 @@ exports.listen = function(server, daemonPort) {
 
         // Notify clients that the data is still being processed
         daemon.on('processing', function() {
-            io.sockets.emit('processing');
+            io.sockets.emit('client_error', {message: 'Query still processing'});
         });
     }
 
@@ -52,17 +51,20 @@ exports.listen = function(server, daemonPort) {
                     }
                     query = queryParams.type + " " + queryParams.column + " " + groupBy;
                     break;
-                case 'InitDB': {
-                    query = 'InitDB';
-                }
+                case 'ATTRIBUTE_LIST':
+                    query = 'ATTRIBUTE_LIST';
+                    break;
+                case 'TUPLES':
+                    query = 'TUPLES';
+                    break;
             }
             if(!query) {
                 // The query was not formatted correctly
-                socket.emit('bad_format');
+                socket.emit('client_error', {message: "Query " + queryParams +" not recognized"});
             }
             else if(!daemon.write(query)) {
                 // Notify the socket that the query was not accepted
-                socket.emit('processing');
+                socket.emit('client_error', {message: 'Query still processing'});
             }
         });
     });
