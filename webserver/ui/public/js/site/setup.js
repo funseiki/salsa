@@ -1,9 +1,9 @@
 var socketHandler = {
-    state: 'NONE',
+    state: 'ATTRIBUTE_LIST',
     setupListeners: function(socket) {
         this.socket = socket;
         var that = this;
-        socket.emit('query', {type: 'ATTRIBUTE_LIST'});
+        this.query({type: 'ATTRIBUTE_LIST'});
         socket.on('error', function() {
             console.log("Error with the socket");
         });
@@ -34,6 +34,10 @@ var socketHandler = {
         socket.on('snapshot', function(results) {
             visualizer.update(results.data);
         });
+    },
+    query: function(query) {
+        this.socket.emit('query', query);
+        this.state = query.type;
     },
     uiListeners: function() {
         // Method for setting up listeners to the UI
