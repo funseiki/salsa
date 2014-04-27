@@ -21,19 +21,20 @@ var DaemonProto = {
     },
     updateResult: function(newLine) {
         this.result += newLine;
+        // Add a line break to each new line (we need some kind of separator)
+        this.result += "\n";
     },
-    parseResponse: function(response) {
-        console.log("Received response", response);
-        switch(response) {
+    parseLine: function(line) {
+        switch(line) {
             case "START_SNAPSHOT":
             case "START_RESULT":
                 // Clear out the result if we're just starting to read our stream
                 this.clearResult();
-                this.state=response;
+                this.state=line;
                 break;
             case "END_SNAPSHOT":
                 this.emit('snapshot', this.result);
-                this.state = response;
+                this.state = line;
                 break;
             case "END_RESULT":
                 this.emit('result', this.result);
@@ -42,8 +43,16 @@ var DaemonProto = {
             case "PROCESSING_QUERY":
                 break;
             default: // Data
-                this.updateResult(response);
+                this.updateResult(line);
                 break;
+        }
+    },
+    parseResponse: function(response) {
+        var responseString = response.toString();
+        console.log("Received response", responseString);
+        var lines = responseString.split("\n");
+        for(var index in lines) {
+            this.parseLine(lines[index]);
         }
     },
     listen: function(port) {
@@ -54,7 +63,7 @@ var DaemonProto = {
         });
         this.client.on('data', function(data) {
             // Parse the response we've received to see if we should emit anything
-            that.parseResponse(data.toString());
+            that.parseResponse(data);
         });
         this.client.on('end', function(data) {
             that.emit('end', data);
@@ -64,9 +73,9 @@ var DaemonProto = {
         });
     },
     write: function(dataString) {
-        if(client && this.state == "READY") {
+        if(this.client && this.state == "READY") {
             // Should only allow writes if we're there are no jobs being sent already
-            client.write(dataString);
+            this.client.write(dataString);
             return true;
         }
         else {
