@@ -57,19 +57,23 @@ function sendResult(result, isFinal, socket) {
 }
 
 function doSum(column, groupBy, socket) {
-    for(var i = 1; i < 6; i++) {
+    var i = 1;
+    function stuff() {
         var out = [
             "1," + i + "," + "4," + (5/(i)),
             "2," + (i*i) + "," + "4," + (5/(i)),
             "3," + (i+i) + "," + "4," + (5/(i)),
         ];
         if(i < 5) {
-            setTimeout(sendResult, 3000, out, false, socket);
+            sendResult(out, false, socket);
+            i++;
+            setTimeout(stuff, 3000);
         }
         else {
-            setTimeout(sendResult, 3000, out, true, socket);
+            sendResult(out, true, socket);
         }
     }
+    stuff();
 }
 
 function doTuples(socket) {
