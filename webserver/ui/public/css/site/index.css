@@ -16,3 +16,17 @@ body {
 .attribute-row {
     margin-right: 0px;
 }
+
+.attribute {
+
+}
+
+.groupBy-selected {
+    color: #3c763d;
+    background-color: #dff0d8;
+}
+
+.column-selected {
+    color: #31708f;
+    background-color: #c4e3f3;
+}

@@ -43,8 +43,5 @@ var socketHandler = {
     query: function(query) {
         this.socket.emit('query', query);
         this.state = query.type;
-    },
-    uiListeners: function() {
-        // Method for setting up listeners to the UI
     }
 };
