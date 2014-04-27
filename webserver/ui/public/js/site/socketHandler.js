@@ -13,7 +13,7 @@ var socketHandler = {
         });
 
         socket.on('result', function(results) {
-            console.log(results);
+            console.log('result', results);
 
             // Split by line breaks and make sure no elements are
             var data = results.data.split("\n")
@@ -37,7 +37,10 @@ var socketHandler = {
         });
 
         socket.on('snapshot', function(results) {
-            visualizer.update(results.data);
+            console.log('snapshot', results);
+            var data = results.data.split("\n")
+                .filter(function(value) { return value.length > 0; });
+            visualizer.update(data);
         });
     },
     query: function(query) {
