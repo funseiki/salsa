@@ -1,12 +1,10 @@
 Instructions to compile and run QueryDaemon, ReadSnapshot, QuerySumMapReduce:
   1. You need to build the mapreduce file into a jar file called mapreduce.jar first.
-
-   ```javac -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar:mapreduce.jar *.java ``` <br>
-
+   ``javac -cp ../mapreduce/mapreduce.jar:/hadoop/hadoop-hop-0.2/hadoop-hop-0.2-core.jar QueryProtocol.java QueryDaemon.java ``
+<br>
 Instructions to run the QueryDaemon
 
-```java -cp ${HADOOP_HOME}/hadoop-hop-0.2-core.jar:/{$HADOOP_HOME}/lib/commons-logging-1.0.4.jar:mapreduce.jar:. QueryDaemon <portnumber> ``` <br>
-
+```java -cp ../mapreduce/mapreduce.jar:/hadoop/hadoop-hop-0.2/hadoop-hop-0.2-core.jar:/hadoop/hadoop-hop-0.2/lib/commons-logging-1.0.4.jar:. QueryDaemon <portnumber> ``` <br>
 Instructions to compile and run the TestClient:
 
 ```javac TestClient.java ``` 
