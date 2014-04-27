@@ -5,7 +5,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import mapreduce.JobHandler;
- 
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.Path; 
+
 public class QueryProtocol {
 
     private static final int QUERYOPSUM = 0;
@@ -45,6 +50,7 @@ public class QueryProtocol {
     {
         try {
              query_job = new JobHandler(clientout);
+             //query_job.run("/yahoo_data/part-r-00000", "/query_out", jobtype, key_i, col_i);
              query_job.run("/yahoo_data/", "/query_out", jobtype, key_i, col_i);
              //System.out.println("FINISHED MAP REDUCE");             
              
@@ -67,6 +73,82 @@ public class QueryProtocol {
 
     }
 
+    /* Send the client the attributes in the db table */
+    private void sendClientAttributeList()
+    {
+        Path path = new Path("/yahoo_data/pig_header");
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "hdfs://localhost:9000/");
+        conf.set("fs.default.name", "hdfs://localhost:9000");
+        conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-site.xml"));
+        conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-default.xml"));
+        try{
+        FileSystem fs = FileSystem.get(conf);
+        if(!fs.exists(path))
+        {
+            clientout.println("Attribute list file not found");
+            return;
+        }
+        FSDataInputStream in = fs.open(path);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String line;
+        clientout.println("START_ATTRIBUTE");
+            line = br.readLine();
+            while(line != null)  
+            {
+                clientout.println(line);
+                line = br.readLine();
+            }
+           br.close();
+           in.close();
+        clientout.println("END_ATTRIBUTE");
+        }catch(Exception e)
+        {
+            System.err.println("Exception in SendClientAttrList " + e);
+        }
+    } // end method sendClientAttribute List
+
+    /* send client the first 10 tuples of the DB */
+    private void sendClientDBTuples()
+    {
+       int i = 0 ;
+       int num_tuples = 10;
+       Path path = new Path("/yahoo_data/part-r-00000");
+       Configuration conf = new Configuration();
+        conf.set("fs.defaultFS", "hdfs://localhost:9000/");
+        conf.set("fs.default.name", "hdfs://localhost:9000");
+        conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-site.xml"));
+        conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-default.xml"));
+        try{
+        FileSystem fs = FileSystem.get(conf);
+
+        if(!fs.exists(path))
+        { 
+            clientout.println("The DB file not found");
+            return;
+        }
+        FSDataInputStream in = fs.open(path);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        String line;
+        //try{
+        clientout.println("START_TUPLES");
+            line = br.readLine();
+            while(line != null && i < num_tuples)  
+            {
+                clientout.println(line);
+                line = br.readLine();
+                i++;
+            }
+           br.close();
+           in.close();
+        clientout.println("END_TUPLES");
+        }catch(Exception e)
+        {
+            System.err.println("Exception in SendClienDBTuples " + e);
+        }
+    } // end method sendClientDBTuples
+
+
     public void processInput(String theInput) {
         //List<String> theOutput = new ArrayList();
         if(theInput == null || theInput == "\n")
@@ -82,6 +164,15 @@ public class QueryProtocol {
              clientout.println("Bye.");
              state = READY;
         }
+        if(theInput.equalsIgnoreCase("attribute_list"))
+        {
+            sendClientAttributeList();
+        }
+        if(theInput.equalsIgnoreCase("tuples"))
+        {
+            sendClientDBTuples();
+        }
+        
         if (state == READY) {
             if((theInput.toLowerCase().contains(SUM)) || 
                (theInput.toLowerCase().contains(AVERAGE)))
@@ -120,7 +211,7 @@ public class QueryProtocol {
             }
             else
             {
-               clientout.println("PROCESSING QUERY");
+               clientout.println("PROCESSING_QUERY");
             }
         } 
     }
