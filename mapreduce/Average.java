@@ -91,9 +91,9 @@ IOException {
         double average = sum / num_vals;
         StringBuilder outpt = new StringBuilder();
         outpt.append(average);
-        outpt.append(", ");
+        outpt.append(",");
         outpt.append(num_vals);
-        outpt.append(", ");
+        outpt.append(",");
         outpt.append(ConfInter);
         Text out = new Text();
         out.set(outpt.toString());
@@ -101,11 +101,13 @@ IOException {
         output.collect(key, out);
 
         // Write to HDFS directly
+        /*
         Configuration confr = new Configuration();
         FileSystem fs = FileSystem.get(confr);
         FSDataOutputStream dos = fs.create(new Path("/user/tmp"), true); 
         dos.writeChars(outpt.toString());
         dos.close();
+        */
       }
 
       public double calcMeanCI(SummaryStatistics stats, double level)
@@ -155,8 +157,7 @@ IOException {
         //FileInputFormat.setInputPaths(conf, new Path(inputPath));
         //FileOutputFormat.setOutputPath(conf, new Path(outputPath));
 
-        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.3"));
-        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.2"));
+        conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.1"));
         conf.setBoolean("mapred.map.pipeline", true);
         //Average.column = 2;
 
