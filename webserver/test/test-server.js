@@ -26,6 +26,8 @@ var tuples = [
     "D,11,2",
 ];
 
+var attributes = ['Letter', 'Number1', 'Number2'];
+
 /************* END TEST DATA ****************/
 
 function sendResult(result, isFinal, socket) {
@@ -70,8 +72,12 @@ function doSum(column, groupBy, socket) {
     }
 }
 
-function doInitDB(socket) {
+function doTuples(socket) {
     sendResult(tuples, true, socket);
+}
+
+function doAttributes(socket) {
+    sendResult(attributes, true, socket);
 }
 
 function parseInput(input, socket) {
@@ -82,8 +88,11 @@ function parseInput(input, socket) {
         case "SUM":
             doSum(params[1], params[2], socket);
             break;
-        case "InitDB":
-            doInitDB(socket);
+        case "ATTRIBUTE_LIST":
+            doAttributes(socket);
+            break;
+        case "TUPLES":
+            doTuples(socket);
             break;
         default:
             break;
