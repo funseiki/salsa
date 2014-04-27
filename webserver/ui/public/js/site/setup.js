@@ -1,32 +1,56 @@
+var socketHandler = {
+    state: 'NONE',
+    setupListeners: function(socket) {
+        this.socket = socket;
+        var that = this;
+        socket.emit('query', {type: 'ATTRIBUTE_LIST'});
+        socket.on('error', function() {
+            console.log("Error with the socket");
+        });
+
+        socket.on('client_error', function(message) {
+            console.log(message);
+        });
+
+        socket.on('result', function(results) {
+            console.log(results);
+            switch(that.state) {
+                case 'SUM':
+                case 'AVERAGE':
+                    visualizer.update(results.data);
+                    visualizer.done();
+                    break;
+                case 'ATTRIBUTE_LIST':
+                    guiBuilder.buildAttributeList(results.data);
+                    break;
+                case 'TUPLES':
+                    guiBuilder.buildTupleList(results.data);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        socket.on('snapshot', function(results) {
+            visualizer.update(results.data);
+        });
+    },
+    uiListeners: function() {
+        // Method for setting up listeners to the UI
+    }
+};
+
 function setupSocket(url, callbacks) {
     var socket = io.connect(url);
-    socket.on('news', function(data) {
-        console.log(data);
-        socket.emit('pokemon', {pokemon: 'bulbasaur'});
-    });
-
     $.each(callbacks, function(index, callback) {
         // Free sockets!
         callback(socket);
     });
 }
 
-function setupViz() {
-    var data = [1, 2, 3, 4, 10, 12, 40, 3, 5, 1];
-    var width = 420,
-        barHeight = 20;
-    var viz = d3.select(".visualization");
-    var bar = viz.selectAll("div")
-                .data(data);
-    var barEnter = bar.enter().append("div")
-                    .style("width", function(d) { return d * 10 + "px"; })
-                    .text(function(d) { return d; });
-}
-
 $(document).ready(function() {
     $.get('/serverinfo', function(data, status, xhr) {
         var url = data.ip + ":" + data.port;
-        setupSocket(url, [guiSetup]);
-        setupViz();
+        setupSocket(url, [socketHandler.setupListeners.bind(socketHandler)]);
     });
 });
