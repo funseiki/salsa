@@ -1,5 +1,5 @@
 
-data =  [[1,40,5,6],[4,50,7,8]];
+data1 =  ["0,0,0,0","0,0,0,0","0,0,0,0"];
 
 var chart;
 var w = 20,
@@ -19,7 +19,7 @@ var visualizer = {
         // TODO: clear the visualization
     },
     startViz: function(shape, params) {
-                
+        data = this.convert(data1);
         chart = d3.select(".vis").append("svg")
               .attr("class", "chart")
               .attr("width", w*30 )
@@ -41,9 +41,24 @@ var visualizer = {
               .style("stroke", "#000");
 
     },
+    convert: function(data){
+        var newData = new Array();
+            var i;
+            console.log(data);
+            for(i=0;i<data.length;i++)
+            {
+                var numbers = data[i].split(",");
+                for (var j = 0; j <numbers.length; j++) {
+                    numbers[j] = parseInt(numbers[j]);
+                };
+                newData.push(numbers);
+            }
+            console.log(newData);
+            return newData;
+    },
     update: function(data) {
         // Call this when there is data to update the visualization with
-        console.log(data);
+        data = this.convert(data);
         chart.selectAll("rect")
         .data(data)
       .transition()
@@ -62,13 +77,8 @@ var visualizer = {
 
 
 visualizer.startViz();
-visualizer.update(data);
+visualizer.update(data1);
 
-/*setInterval(function() {
-   data.shift();
-   data.push(next());
-   visualizer.update(data);
- }, 1500);*/
 
 
 
