@@ -4,7 +4,9 @@
  ************************************/
 
 var net = require('net'),
-    async = require('async');
+    async = require('async'),
+    path = require('path'),
+    test_dump = require(path.join(__dirname,'data_poop'));
 
 var server = net.createServer(function(socket) {
     console.log('Client connection received');
@@ -80,6 +82,22 @@ function doTuples(socket) {
     sendResult(tuples, true, socket);
 }
 
+function doAverage(column, groupBy, socket) {
+    var i = 0;
+    function stuff() {
+        var out = test_dump[i];
+        if(i < (test_dump.length - 1)) {
+            sendResult(out, false, socket);
+            i++;
+            setTimeout(stuff, 1000);
+        }
+        else {
+            sendResult(out, true, socket);
+        }
+    }
+    stuff();
+}
+
 function doAttributes(socket) {
     sendResult(attributes, true, socket);
 }
@@ -91,6 +109,10 @@ function parseInput(input, socket) {
     switch(params[0]) {
         case "SUM":
             doSum(params[1], params[2], socket);
+            break;
+        case "AVERAGE":
+            console.log('poopy');
+            doAverage(params[1], params[2], socket);
             break;
         case "ATTRIBUTE_LIST":
             doAttributes(socket);
