@@ -1,9 +1,8 @@
-
 data1 =  ["0,0,0,0","0,0,0,0","0,0,0,0"];
 
 var chart;
-var w = 20,
-    h = 80;
+var w = 50,
+    h = 200;
            
 var x = d3.scale.linear()
     .domain([0, 1])
