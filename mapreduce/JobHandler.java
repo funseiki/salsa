@@ -99,14 +99,18 @@ class MapReduceJob extends NotificationThread implements Runnable
         t.start();
     }
 
-    public void stopJob()
+    public void stopJob() throws Exception
     {
        if(jobtype.toLowerCase().equals("average"))
        {
 
+           avg_job.stopJob();
+
        }
        else
        {
+
+          sum_job.stopJob();
 
        }  
        t.interrupt();
@@ -163,8 +167,8 @@ class Poll implements Runnable, ThreadCompleteListener
         this.mapReduceThread = mapReduceThread;
         this.mapReduceThread.addListener(this);
         mapReduceComplete = false;
-    	this.dirPath = dirPath;
-        //this.dirPath = "/tmp";
+//    	this.dirPath = dirPath;
+        this.dirPath = "/tmp";
         t.start();
 	}
 
@@ -191,25 +195,12 @@ class Poll implements Runnable, ThreadCompleteListener
                 for (int i=0;i<status.length;i++){
                      Path path = status[i].getPath();
                      String fileName = path.getName();
-                     if(fileName.contains("snapshot"))
+
+                     if(fileName.contains("tmp")  && snapshotTime < status[i].getModificationTime())
                     {
-                      if(mostRecentSnapshot == null || status[i].getModificationTime() > snapshotTime)
-                      {
-                         mostRecentSnapshot = fileName;
-                         snapshotTime = status[i].getModificationTime();
-                         snapshotPath = path;
-                      }
-                    }
-                    System.out.println("------------------------------------");
-                    System.out.println(mostRecentSnapshot+" "+snapshotTime);
-                    System.out.println("------------------------------------");
-                
-                    if(mostRecentSnapshot != null && mostRecentSnapshot.contains("snapshot") && snapshotTime == status[i].getModificationTime())
-              // if(mostRecentSnapshot != null && mostRecentSnapshot.contains("tmp"))
-                    {
-                        FSDataInputStream in = fs.open(snapshotPath);
+                        FSDataInputStream in = fs.open(path);
                         clientout.println("START_SNAPSHOT");
-                    System.out.println(mostRecentSnapshot+" "+snapshotTime);
+                        System.out.println(status[i].getModificationTime()+" "+ fileName);
                         byte buffer[] = new byte[2048];
                         int bytesRead = 0;
                         while((bytesRead = in.read(buffer)) != -1  )
@@ -223,9 +214,26 @@ class Poll implements Runnable, ThreadCompleteListener
                             }
                         }
                         clientout.println("END_SNAPSHOT");
-                    } 
-                } // end for 
+                    }
+
+                     //if(fileName.contains("snapshot"))
+                     if(fileName.contains("tmp"))
+                     {
+                      if(mostRecentSnapshot == null || status[i].getModificationTime() > snapshotTime)
+                      {
+                         mostRecentSnapshot = fileName;
+                         snapshotTime = status[i].getModificationTime();
+                         snapshotPath = path;
+                      }
+                    }
+                    System.out.println("------------------------------------");
+                    System.out.println(mostRecentSnapshot+" "+snapshotTime);
+                    System.out.println("------------------------------------");
+                
+                 } // end for 
               } // map reduce complete
+              fs.delete(new Path(dirPath), true);
+              
             }catch(Exception e){
 		System.out.println(e);
                 System.out.println("File not found");

@@ -38,7 +38,12 @@ public class QueryProtocol {
 
     public void cancelQuery()
     {
-       query_job.cancelMapReduceJob();
+       try{ 
+         query_job.cancelMapReduceJob();
+       } catch(Exception e)
+       {
+          System.err.println("Could not cancel job. " + e);
+       }
     }
 
     public boolean queryStatus()

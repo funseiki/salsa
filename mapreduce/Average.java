@@ -105,13 +105,16 @@ IOException {
         output.collect(key, out);
 
         // Write to HDFS directly
-        /*
+        
         Configuration confr = new Configuration();
         FileSystem fs = FileSystem.get(confr);
-        FSDataOutputStream dos = fs.create(new Path("/user/tmp"), true); 
+        FSDataOutputStream dos = fs.create(new Path("/tmp/tmp"), true); 
+        dos.writeChars(key.toString());
+        dos.writeChars(",");
         dos.writeChars(outpt.toString());
+        dos.writeChars("\n");
         dos.close();
-        */
+        
       }
 
       public double calcMeanCI(SummaryStatistics stats, double level)
@@ -132,6 +135,11 @@ IOException {
     } // end Reduce class
  
 
+    RunningJob rjob;
+    public void stopJob() throws Exception
+    {
+           rjob.killJob();
+    }
 
     public void run(String inputPath, String outputPath, String key_index, String value_index) throws Exception
     {
@@ -173,9 +181,9 @@ IOException {
 
         String jobID = conf.get("mapred.job.id");
         JobClient jobClient = new JobClient(conf);
-        RunningJob job = jobClient.getJob(JobID.forName(jobID));
+        rjob = jobClient.getJob(JobID.forName(jobID));
 
-        JobClient.runJob(conf);
+        rjob = JobClient.runJob(conf);
     }
         
  public static void main(String[] args) throws Exception {

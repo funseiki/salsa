@@ -90,6 +90,12 @@ public class Sum{
          test.run(args[0], args[1], args[2], args[3]);
      }
 
+     RunningJob rjob;
+     public void stopJob() throws Exception
+     {
+         rjob.killJob();
+     }
+
      public void run(String inputPath, String outputPath, String key_index, String value_index) throws Exception {      
         System.out.println("Group by " + key_index + " sum column " + value_index);
 
@@ -135,7 +141,7 @@ public class Sum{
          conf.setBoolean("mapred.map.pipeline", true);
          JobClient client = new JobClient(conf);
          //client.submitJob(conf);
-         client.runJob(conf);
+          rjob = client.runJob(conf);
 
          /* 
          RunningJob rjob = client.submitJob(conf);
