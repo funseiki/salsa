@@ -14,12 +14,14 @@ exports.listen = function(server, daemonPort) {
 
         // The daemon API
         daemon.on('snapshot', function(data) {
-            console.log("Response received: " + data.toString());
+	    console.log("GOT SNAPSHOT: ", data.toString());
             // Send the snapshot result to all connected clients
             io.sockets.emit('snapshot', {'data': data});
         });
 
         daemon.on('result', function(data) {
+	    console.log("GOT RESULT: ", data);
+	    console.log("GOT RESULT to string: ", data.toString());
             // Send the snapshot result to all connected clients
             io.sockets.emit('result', {'data': data});
         });
@@ -41,6 +43,7 @@ exports.listen = function(server, daemonPort) {
 
     io.sockets.on('connection', function(socket) {
         socket.on('query', function(queryParams) {
+	    console.log(queryParams);
             var query = null;
             switch(queryParams.type) {
                 case 'SUM':

@@ -73,12 +73,15 @@ var DaemonProto = {
         });
     },
     write: function(dataString) {
+	console.log("The DAEMON is about to WRITE: ", dataString);
         if(this.client && this.state == "READY") {
             // Should only allow writes if we're there are no jobs being sent already
-            this.client.write(dataString);
+            this.client.write(dataString + "\n");
+	    console.log("SHOULD HAVE WRITTEN");
             return true;
         }
         else {
+	    console.log("DID NOT WRITE");
             // Notify the client that we cannot perform a query yet
             return false;
         }
