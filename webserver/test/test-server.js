@@ -46,6 +46,7 @@ function sendResult(result, isFinal, socket) {
         },
         function(cb) {
             async.each(result, function(row, callback) {
+                console.log("Writing to socket ", row);
                 socket.write(row+"\n", callback);
             },
             function(err){
@@ -105,7 +106,8 @@ function doAttributes(socket) {
 function parseInput(input, socket) {
     var inputString = input.toString();
     console.log(inputString);
-    var params = inputString.split(" ");
+    var params = inputString.split("\n")[0].split(" ");
+    console.log(params);
     switch(params[0]) {
         case "SUM":
             doSum(params[1], params[2], socket);
@@ -115,6 +117,7 @@ function parseInput(input, socket) {
             doAverage(params[1], params[2], socket);
             break;
         case "ATTRIBUTE_LIST":
+            console.log('poopy');
             doAttributes(socket);
             break;
         case "TUPLES":
