@@ -68,7 +68,7 @@ var uiListener = {
     eventListeners: function() {
         var that = this;
         $('.attribute').click(function(event) {
-            if(event.ctrlKey) {
+            if(event.shiftKey) {
                 that.deselectAttribute($(event.target));
             }
             else {
