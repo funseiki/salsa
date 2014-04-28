@@ -232,7 +232,7 @@ class Poll implements Runnable, ThreadCompleteListener
                 
                  } // end for 
               } // map reduce complete
-              fs.delete(new Path(dirPath), true);
+              fs.delete(new Path("/tmp/tmp"), true);
               
             }catch(Exception e){
 		System.out.println(e);
@@ -280,7 +280,7 @@ public class JobHandler{
 
     public void cancelMapReduceJob()
     {
-        t1.stopJob(); 
+        //t1.stopJob(); 
         p1.mapReduceComplete = true;
 
     }
