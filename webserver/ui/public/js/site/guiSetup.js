@@ -1,6 +1,8 @@
 // Singleton for building portions of the UI
 var guiBuilder = {
-    buildAttributeList: function(attributes) {
+    buildAttributeList: function(attributeArray) {
+        var attributes = attributeArray[0].split(",")
+            .filter(function(value) { return value.length > 0; });
         console.log("these are the attributes:", attributes);
         var list = $('#attributes');
         for(var i = 0; i < attributes.length; i++) {
