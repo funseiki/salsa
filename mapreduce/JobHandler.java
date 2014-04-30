@@ -98,6 +98,15 @@ class MapReduceJob extends NotificationThread implements Runnable
         this.jobColumn = jobColumn;
         t.start();
     }
+ 
+    public String getJobId()
+    {
+        if(jobtype.toLowerCase().equals("average"))
+        {
+            return avg_job.getJobId();
+        }
+        return "";
+    }
 
     public void stopJob() throws Exception
     {
@@ -154,21 +163,28 @@ class Poll implements Runnable, ThreadCompleteListener
     Thread t;
     String dirPath;
     NotificationThread mapReduceThread;
+    //MapReduceJob mapReduceThread;
     Boolean mapReduceComplete;
     String mostRecentSnapshot;
     Path snapshotPath;
     FileSystem fs;
     PrintWriter clientout;
+    String jobType;
 
 	public Poll(PrintWriter clientout, String dirPath, NotificationThread mapReduceThread)
+//	public Poll(PrintWriter clientout, String dirPath, MapReduceJob  mapReduceThread)
 	{
         t = new Thread(this);
         this.clientout = clientout;
+       
         this.mapReduceThread = mapReduceThread;
         this.mapReduceThread.addListener(this);
         mapReduceComplete = false;
-//    	this.dirPath = dirPath;
-        this.dirPath = "/tmp";
+        System.out.println("path of snapshot file: " + dirPath);
+    	//this.dirPath = dirPath;
+    	this.dirPath = "/query_out/";
+        System.out.println("path of snapshot file: " + this.dirPath);
+       // this.dirPath = "/tmp";
         t.start();
 	}
 
@@ -180,23 +196,53 @@ class Poll implements Runnable, ThreadCompleteListener
             conf.set("fs.defaultFS", "hdfs://localhost:9000/");
             //conf.set("fs.default.name", "hdfs://localhost:54310");
             conf.set("fs.default.name", "hdfs://localhost:9000");
-      //      conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-site.xml"));
-        //    conf.addResource(new Path("/usr/local/hadoop/conf/hadoop-default.xml"));
             conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-site.xml"));
             conf.addResource(new Path("/hadoop/hadoop-hop-0.2/conf/hadoop-default.xml"));
             fs = FileSystem.get(conf);
+
             clientout.println("START_RESULT");
             mostRecentSnapshot = null;
             long snapshotTime = -1;
+            String orig_dirPath = new String(dirPath);
+            boolean dir_visited = false;
             while(!mapReduceComplete)
             {
-                Thread.sleep(3000);
-                FileStatus[] status = fs.listStatus(new Path(dirPath));;
+                Thread.sleep(2000);
+      
+                Path out_dir_path = new Path(dirPath);
+                if(fs.exists(out_dir_path))
+                {
+                //System.out.println("Path of output " + out_dir_path.toString());
+                FileStatus[] status = fs.listStatus(out_dir_path);;
                 for (int i=0;i<status.length;i++){
                      Path path = status[i].getPath();
                      String fileName = path.getName();
+                     if(fileName.contains("temporary") && dir_visited == false)
+                     {
+                         dirPath = path.toString();
+                         dirPath.concat("/");
+                         System.out.println("NEW DIR PATH " + dirPath);
+                         break;
+                     }
+                     if(fileName.contains("attempt") && dir_visited == false)
+                     {
+                         dirPath = path.toString();
+                         dirPath.concat("/");
+                         System.out.println("NEW DIR PATH " + dirPath);
+                         break;
+                     }
+                     if(fileName.contains("snapshot-00001") && dir_visited == false)
+                     {
+                         dirPath = orig_dirPath;
+                         System.out.println("NEW DIR PATH " + dirPath);
+                         snapshotTime = snapshotTime - 5; 
+                         dir_visited = true;
+                         break;
+                     } 
+                 //    System.out.println("Files in dir: " + fileName + " Modified on " + status[i].getModificationTime());
+                     if(fileName.contains("snapshot")  && snapshotTime <= status[i].getModificationTime())
+                    // if(fileName.contains("snapshot")  && status[i].getLen() > 0 && status[i].getModificationTime() > snapshotTime)
 
-                     if(fileName.contains("tmp")  && snapshotTime < status[i].getModificationTime())
                     {
                         FSDataInputStream in = fs.open(path);
                         clientout.println("START_SNAPSHOT");
@@ -216,8 +262,8 @@ class Poll implements Runnable, ThreadCompleteListener
                         clientout.println("END_SNAPSHOT");
                     }
 
-                     //if(fileName.contains("snapshot"))
-                     if(fileName.contains("tmp"))
+                     if(fileName.contains("snapshot"))
+                     //if(fileName.contains("tmp"))
                      {
                       if(mostRecentSnapshot == null || status[i].getModificationTime() > snapshotTime)
                       {
@@ -231,8 +277,9 @@ class Poll implements Runnable, ThreadCompleteListener
                     System.out.println("------------------------------------");
                 
                  } // end for 
+               }// if file exists
               } // map reduce complete
-              fs.delete(new Path("/tmp/tmp"), true);
+              //fs.delete(new Path("/tmp/tmp"), true);
               
             }catch(Exception e){
 		System.out.println(e);
@@ -295,6 +342,7 @@ public class JobHandler{
         t1 = new MapReduceJob(input, output, jobtype, jobGroupby, jobColumn);
         p1 = new Poll(clientout, output, t1);   
         System.out.println("Created polling and mapred job");
+        System.out.println("MAP RED JOB ID " + t1.getJobId());
     }
 
 

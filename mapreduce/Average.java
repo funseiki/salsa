@@ -106,14 +106,14 @@ IOException {
 
         // Write to HDFS directly
         
-        Configuration confr = new Configuration();
+        /*Configuration confr = new Configuration();
         FileSystem fs = FileSystem.get(confr);
         FSDataOutputStream dos = fs.create(new Path("/tmp/tmp"), true); 
         dos.writeChars(key.toString());
         dos.writeChars(",");
         dos.writeChars(outpt.toString());
         dos.writeChars("\n");
-        dos.close();
+        dos.close(); */
         
       }
 
@@ -139,6 +139,11 @@ IOException {
     public void stopJob() throws Exception
     {
            rjob.killJob();
+    }
+
+    public String getJobId()
+    {
+       return rjob.getID().toString();
     }
 
     public void run(String inputPath, String outputPath, String key_index, String value_index) throws Exception

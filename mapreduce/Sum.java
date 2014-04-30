@@ -13,6 +13,9 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.*;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+// needed to calculate the input size
+import java.lang.Runtime;
  
 import java.io.IOException;  
 import java.util.*;  
@@ -28,9 +31,9 @@ import org.apache.hadoop.util.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -72,11 +75,18 @@ class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text
            else
                value_sum.set(1);
            */
+
+           StringBuilder outpt = new StringBuilder();
            Text val = new Text(); 
            if(column != -1)
-              val.set(tokens[column].trim());
+             // val.set(tokens[column].trim());
+              outpt.append(tokens[column].trim());
            else
-              val.set("0");
+              //val.set("0");
+             outpt.append("0");
+           outpt.append(",");
+           outpt.append(line.length()+2);
+           val.set(outpt.toString());
            output.collect(word, val);  
       }  
 }
@@ -94,6 +104,97 @@ public class Sum{
      public void stopJob() throws Exception
      {
          rjob.killJob();
+     }
+
+     long getInputSize(JobConf conf,FileSystem fs, String inputPath)
+     {
+         Path inpath = new Path(inputPath);
+         long total_size = 0;
+         try{
+
+         if(fs.isDirectory(inpath))
+         {
+            System.out.println("Input path " + inputPath + " is a directory");
+            FileStatus[] status = fs.listStatus(inpath);
+            for(int i=0;i<status.length;i++)
+            {
+              Path path = status[i].getPath();
+              String fileName = path.getName();
+              System.out.println("File in path " + fileName);
+              if(fileName.contains("part"))
+              {
+                   if(fileName.contains(".gz"))
+                   {
+                       System.out.println("File is gz");
+                       String cmd = "\"/hadoop/hadoop-hop-0.2/bin/hadoop dfs -cat " + inputPath + "/" + fileName + " | gzcat | wc -c\" ";
+
+                       String[] command = new String[3];
+                       command[0] = "/bin/sh";
+                       //command[1] = "-c";
+                       command[1] = " ";
+                       command[2] = cmd;
+                       /* {
+                       "/bin/sh", 
+                       "-c",
+                       cmd}; */ 
+                       System.out.println("Cmd: " + cmd);
+                       System.out.println("Command: " + command[0] + "===" + command[1] + " ====" + command[2]);
+                       Runtime run = Runtime.getRuntime();
+                       Process p = null;
+                       try{
+                          p = run.exec(command);
+                          System.out.println("Command: " + command);
+                          InputStream stderr = p.getErrorStream();
+            InputStreamReader isr = new InputStreamReader(stderr);
+            BufferedReader br = new BufferedReader(isr);
+            String line = null;
+            System.out.println("<ERROR>");
+            while ( (line = br.readLine()) != null)
+                System.out.println(line);
+            System.out.println("</ERROR>");
+                       }catch(IOException e)
+                       {
+                          System.err.println("Error in run in gzip command" + e);
+                       }
+                       try{
+                          System.out.println("Waiting for command to complete");
+                          p.waitFor();
+                          System.out.println("Waiting for command to complete");
+                       } catch(InterruptedException e) {
+
+                           System.err.println("Error in waiting for process of gzip command " + e);
+                       }
+                       BufferedReader buf = new BufferedReader(new InputStreamReader(p.getInputStream())); 
+                       String line = ""; 
+                       try {
+                          while ((line=buf.readLine())!=null)
+                          {
+                             String[] token = line.split(" ");
+                             long val = Long.parseLong(token[2]);
+                             total_size += val;
+                             System.out.println(line);
+                          }
+                      } catch (IOException e) { e.printStackTrace(); }  
+                     
+                   }
+                   else
+                   { 
+                      total_size = total_size + status[i].getLen();
+                   }
+              } // if file is part
+
+           } // for all files in input dire
+        } // if input path is directory
+        else
+        {
+           FileStatus stat = fs.getFileStatus(inpath);
+           total_size = stat.getLen(); 
+        }
+        
+        } catch(Exception e) { // try end for is input path a directory
+             System.err.println("Exception in check input path directory " + e);
+        }
+        return total_size;
      }
 
      public void run(String inputPath, String outputPath, String key_index, String value_index) throws Exception {      
@@ -131,6 +232,10 @@ public class Sum{
         Path out = new Path(outputPath);
         FileSystem fs = FileSystem.get(conf);
         fs.delete(out, true);
+
+        long input_size = getInputSize(conf, fs, inputPath);
+        System.out.println("########### INPUT SIZE " + input_size + " ##########");
+        conf.setLong("input_size", input_size);
         
         //DistributedCache.addFileToClassPath(new Path("/lib/commons-math3-3.2.jar"), conf); //, fs);
         FileOutputFormat.setOutputPath(conf, new Path(outputPath));  
@@ -139,22 +244,11 @@ public class Sum{
          
          conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.10"));
          conf.setBoolean("mapred.map.pipeline", true);
+         //conf.setBoolean("mapred.reduce.pipeline", true);
          JobClient client = new JobClient(conf);
          //client.submitJob(conf);
           rjob = client.runJob(conf);
 
-         /* 
-         RunningJob rjob = client.submitJob(conf);
-         while(rjob.isComplete() != true)
-         {
-
-         } */
-         //client.report(rjob, conf);
-
-         //JobID jobid = rjob.getID();
-        // TaskReport[] trs = client.getReduceTaskReports(jobid);
-  
-        //JobClient.runJob(conf);  
      }
 
      public static class Reduce extends MapReduceBase implements Reducer<Text, FloatWritable, Text, FloatWritable> {   
@@ -169,37 +263,57 @@ public class Sum{
     }  
 
      public static class ConfReduce extends MapReduceBase implements Reducer<Text, Text, Text, Text> {   
+
+       public long input_size;
+       public void configure(JobConf job)
+       {
+            input_size = job.getLong("input_size" , 0);         
+       }
        public void reduce(Text key, Iterator<Text> values, OutputCollector<Text, Text> output, Reporter reporter) throws IOException {   
        double sum = 0;  
        int num_vals = 0;
-        
+       double total_bytes = 0; 
+       double bytes = 0;
        SummaryStatistics stats = new SummaryStatistics();
         while (values.hasNext()) { 
           String[] str = values.next().toString().split(",");; 
           double val = Double.parseDouble(str[0]);
-          //sum = sum + values.next().get();
           sum = sum + val;
           num_vals++;
+          bytes = Double.parseDouble(str[1]);
+          total_bytes += bytes; 
           stats.addValue(val);
-          System.out.println("n= " + num_vals + " val= " + val);
+          //System.out.println("n= " + num_vals + " val= " + val);
         }  
-       
+         double avg_bytes_of_tuple = total_bytes / num_vals; 
+         System.out.println("n= " + num_vals + " num_bytes= " + avg_bytes_of_tuple); 
+        double avg = sum / num_vals;
+        double num_tuples = input_size / avg_bytes_of_tuple;
+        double total_sum =  avg * num_tuples;
+        System.out.println("avg " + avg + " input_size "+ input_size + " bytes " + bytes + "  num_tuples " + num_tuples);
         //Calculate 95% confidence interval
         double ConfInter;
         if(num_vals > 1)
           ConfInter = calcMeanCI(stats, 0.95);
         else
           ConfInter = 0;
-        ConfInter = ConfInter * num_vals;
+        double sum_ConfInter;
+        if(num_vals >= num_tuples)
+           sum_ConfInter = ConfInter * num_vals;
+        else
+           sum_ConfInter = ConfInter * num_tuples;
         StringBuilder outpt = new StringBuilder();
-        outpt.append(sum);
+        if(num_vals >= num_tuples)
+          outpt.append(sum);
+        else
+          outpt.append(total_sum);
         outpt.append(",");
         outpt.append(num_vals);
         outpt.append(",");
-        outpt.append(ConfInter);
+        outpt.append(sum_ConfInter);
         Text out = new Text();
         out.set(outpt.toString());
-        System.out.println("key: " + key + " sum: " + sum + " conf:" + ConfInter);
+        System.out.println("key: " + key + " sum: " + total_sum + " conf:" + sum_ConfInter);
         output.collect(key, out);
       }  
  

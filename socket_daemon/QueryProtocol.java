@@ -55,7 +55,7 @@ public class QueryProtocol {
     {
         try {
              query_job = new JobHandler(clientout);
-             //query_job.run("/yahoo_data/part-r-00000", "/query_out", jobtype, key_i, col_i);
+             //query_job.run("part-m-00000.gz", "/query_out", jobtype, key_i, col_i);
              query_job.run("/yahoo_data/", "/query_out", jobtype, key_i, col_i);
              //System.out.println("FINISHED MAP REDUCE");             
              
