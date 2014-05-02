@@ -1,5 +1,5 @@
-Instructions to compile and run QueryDaemon, ReadSnapshot, QuerySumMapReduce:
-  1. You need to build the mapreduce file into a jar file called mapreduce.jar first. <br>
+Instructions to compile QueryDaemon and QueryProtocol:
+  1. You need to build the files in the mapreduce directory called mapreduce.jar first. Instructions are in the mapreduce directory readme. <br>
    ``javac -cp ../mapreduce/mapreduce.jar:/hadoop/hadoop-hop-0.2/hadoop-hop-0.2-core.jar QueryProtocol.java QueryDaemon.java ``
 <br>
 
