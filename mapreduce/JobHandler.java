@@ -165,6 +165,7 @@ class Poll implements Runnable, ThreadCompleteListener
     NotificationThread mapReduceThread;
     //MapReduceJob mapReduceThread;
     Boolean mapReduceComplete;
+    Boolean cancelQuery = false;
     String mostRecentSnapshot;
     Path snapshotPath;
     FileSystem fs;
@@ -180,6 +181,7 @@ class Poll implements Runnable, ThreadCompleteListener
         this.mapReduceThread = mapReduceThread;
         this.mapReduceThread.addListener(this);
         mapReduceComplete = false;
+        cancelQuery = false;
         System.out.println("path of snapshot file: " + dirPath);
     	//this.dirPath = dirPath;
     	this.dirPath = "/query_out/";
@@ -205,9 +207,9 @@ class Poll implements Runnable, ThreadCompleteListener
             long snapshotTime = -1;
             String orig_dirPath = new String(dirPath);
             boolean dir_visited = false;
-            while(!mapReduceComplete)
+            while(!mapReduceComplete && !cancelQuery)
             {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
       
                 Path out_dir_path = new Path(dirPath);
                 if(fs.exists(out_dir_path))
@@ -286,6 +288,9 @@ class Poll implements Runnable, ThreadCompleteListener
                 System.out.println("File not found");
             }
             clientout.println("END_RESULT");
+            
+            if(cancelQuery == true)
+              clientout.println("END_RESULT"); 
             clientout.println("Ready to process query!");
     }
     public void notifyOfThreadComplete(Runnable runner)
@@ -325,10 +330,11 @@ public class JobHandler{
        this.clientout = out;
     }
 
-    public void cancelMapReduceJob()
+    public void cancelMapReduceJob() throws Exception
     {
-        //t1.stopJob(); 
-        p1.mapReduceComplete = true;
+        if(p1.mapReduceComplete == false)
+         t1.stopJob(); 
+        p1.cancelQuery = true;
 
     }
 

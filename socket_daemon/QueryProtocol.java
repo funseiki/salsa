@@ -36,13 +36,15 @@ public class QueryProtocol {
         this.clientout = out;
     }
 
-    public void cancelQuery()
+    public boolean cancelQuery()
     {
        try{ 
          query_job.cancelMapReduceJob();
+         return true;
        } catch(Exception e)
        {
           System.err.println("Could not cancel job. " + e);
+          return false;
        }
     }
 
@@ -204,9 +206,38 @@ public class QueryProtocol {
         } else if (state == PROCESSINGQUERY) {
             if(theInput.toLowerCase().contains("cancel"))
             {
-               cancelQuery();
-               clientout.println("Cancelling query");
+               System.out.println("Recieved cancel request");
+               clientout.println("START_RESULT");
+               if(!cancelQuery())
+                 clientout.println("Could not cancel query");
+               state = READY;
+               return;
             }
+            if(theInput.toLowerCase().contains("update"))
+            {
+                System.out.println("Recieved update query request");
+                if(!cancelQuery())
+                {
+                   clientout.println("Could not update the query");
+                   return;
+                }
+                else
+                {
+                   System.out.println("Cancelled query, now starting the new query in update.");
+                  String[] tokens = theInput.split(" ");
+                  if(tokens.length != 4)
+                  {
+                     System.out.println("Incorrect input for update: " +theInput);
+                     return;
+                  }
+                  String newQuery = tokens[1] + " " + tokens[2] + " " + tokens[3];
+                  System.out.println("NEW QUERY " + newQuery);
+                  state = READY;
+                  processInput(newQuery);
+         
+                }
+            } // end if input is for update
+            
             System.out.println("Processing query checking if it is done"); 
             if(queryStatus() == true)
             {
