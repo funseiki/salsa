@@ -138,7 +138,14 @@ IOException {
     RunningJob rjob;
     public void stopJob() throws Exception
     {
+        System.out.println("CANCELLING JOB");
+            //while(rjob.setupProgress() == JobStatus.PREP )
+              //  continue;
+
+                //System.out.println("Killing job ........ " + rjob.getJobName());
+        System.out.println("JOB prep is done, so can cancel job");
            rjob.killJob();
+        System.out.println("DID KILL JOB");
     }
 
     public String getJobId()
@@ -188,7 +195,8 @@ IOException {
         JobClient jobClient = new JobClient(conf);
         rjob = jobClient.getJob(JobID.forName(jobID));
 
-        rjob = JobClient.runJob(conf);
+        rjob = jobClient.submitJob(conf);
+         rjob.waitForCompletion();
     }
         
  public static void main(String[] args) throws Exception {

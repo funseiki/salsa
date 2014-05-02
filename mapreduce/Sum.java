@@ -103,7 +103,9 @@ public class Sum{
      RunningJob rjob;
      public void stopJob() throws Exception
      {
+         System.out.println("Cancelling Sum job");
          rjob.killJob();
+         System.out.println("Killed the sum job");
      }
 
      long getInputSize(JobConf conf,FileSystem fs, String inputPath)
@@ -126,17 +128,13 @@ public class Sum{
                    if(fileName.contains(".gz"))
                    {
                        System.out.println("File is gz");
-                       String cmd = "\"/hadoop/hadoop-hop-0.2/bin/hadoop dfs -cat " + inputPath + "/" + fileName + " | gzcat | wc -c\" ";
+                      /* String cmd = "\"/hadoop/hadoop-hop-0.2/bin/hadoop dfs -cat " + inputPath + "/" + fileName + " | gzcat | wc -c\" ";
 
                        String[] command = new String[3];
                        command[0] = "/bin/sh";
                        //command[1] = "-c";
                        command[1] = " ";
                        command[2] = cmd;
-                       /* {
-                       "/bin/sh", 
-                       "-c",
-                       cmd}; */ 
                        System.out.println("Cmd: " + cmd);
                        System.out.println("Command: " + command[0] + "===" + command[1] + " ====" + command[2]);
                        Runtime run = Runtime.getRuntime();
@@ -175,8 +173,8 @@ public class Sum{
                              System.out.println(line);
                           }
                       } catch (IOException e) { e.printStackTrace(); }  
-                     
-                   }
+                     */ 
+                   } //if file is .gz
                    else
                    { 
                       total_size = total_size + status[i].getLen();
@@ -244,10 +242,9 @@ public class Sum{
          
          conf.setFloat("mapred.snapshot.frequency", Float.parseFloat("0.10"));
          conf.setBoolean("mapred.map.pipeline", true);
-         //conf.setBoolean("mapred.reduce.pipeline", true);
          JobClient client = new JobClient(conf);
-         //client.submitJob(conf);
-          rjob = client.runJob(conf);
+         rjob = client.submitJob(conf);
+         rjob.waitForCompletion();
 
      }
 
@@ -299,7 +296,7 @@ public class Sum{
           ConfInter = 0;
         double sum_ConfInter;
         if(num_vals >= num_tuples)
-           sum_ConfInter = ConfInter * num_vals;
+           sum_ConfInter = 0;
         else
            sum_ConfInter = ConfInter * num_tuples;
         StringBuilder outpt = new StringBuilder();
