@@ -9,7 +9,8 @@ Instructions to run the QueryDaemon:
   3. Add the apache commons math jar path to hadoop-env.sh to the following lines: <br>
     ```export HADOOP_CLASSPATH=/lib/commons-math3-3.2/commons-math3-3.2.jar```
     ```HADOOP_TASKTRACKER_OPTS="-classpath<colon-separated-paths-to-your-jars>"``` <br>
-  4. Restart Hadoop for the classpath changes to take effect. <br>
+  4. Change the port of fs.default.name to 9000 in the hadoop-site.xml <br> 
+  5. Restart Hadoop for the classpath changes to take effect. <br>
   
 ```java -cp /hadoop/hadoop-hop-0.2/hadoop-hop-0.2-core.jar:../mapreduce/mapreduce.jar:/hadoop/hadoop-hop-0.2/lib/commons-logging-1.0.4.jar:. QueryDaemon 8081``` <br>
 
