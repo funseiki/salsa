@@ -36,7 +36,7 @@ public static class Map extends MapReduceBase implements Mapper<LongWritable, Te
         if(group_by != -1)
             outputKey.set(fields[group_by]);
         else
-            outputKey.set("");
+            outputKey.set("AVERAGE");
         /*if(column != -1)
             //outputValue.set(Float.parseFloat(fields[column]));
             outputValue.set(Float.parseFloat(fields[column]));
@@ -96,8 +96,8 @@ IOException {
         StringBuilder outpt = new StringBuilder();
         outpt.append(average);
         outpt.append(",");
-        outpt.append(num_vals);
-        outpt.append(",");
+        //outpt.append(num_vals);
+        //outpt.append(",");
         outpt.append(ConfInter);
         Text out = new Text();
         out.set(outpt.toString());
