@@ -3,14 +3,16 @@ function BarViz(height, width, margin, id) {
 }
 extend(BarViz, Viz);
 
-BarViz.prototype.update = function(data){
+BarViz.prototype.update = function(inData){
     // Only update if we're not done yet
     if(this.done) {
         return;
     }
 
+    inData = this.convert(inData);
+
     this.x = d3.scale.linear()
-        .range([0, this.width])
+        .rangeRoundBands([0, this.width])
         // Dummy domain (we'll change this when we get the data)
         .domain([0, 100]);
 
