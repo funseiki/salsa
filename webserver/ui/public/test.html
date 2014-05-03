@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="/css/lib/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/site/index.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+              <h2>Salsa</h2>
+            </div>
+            <!-- Aggregation Methods -->
+            
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="row" id="header">
+                        <h4 class="header">Attributes</h4>
+                    </div>
+                    <div class="row attribute-row">
+                        <ul class="list-group" id="attributes"></ul>
+                    </div>
+                </div>
+                <div class="col-md-8 vis-div">
+                        <div class="row">
+                                <div class="btn-group-wrap">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default queryButton" data-type='SUM'>Sum</button>
+                                        <button type="button" class="btn btn-default queryButton" data-type='AVERAGE'>Average</button>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="row" id="">
+                          <div class="panel-group" id="accordion">
+                          <div class="panel panel-default">
+                            <div class="panel-heading">
+                              <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                  View Data
+                                </a>
+                              </h4>
+                            </div>
+                            <div id="collapseOne" class="panel-collapse collapse in">
+                              <div class="panel-body">
+                                <table class="table table-bordered">
+                                  
+                                </table>
+                              </div>
+                            </div>
+                          </div>  
+                        </div>
+                        </div>
+                    <!-- Where the visualization will go -->
+                    <div class="row vis-row">
+                        <ul class="nav nav-tabs">
+                          <li class="active" ><a href="#home" data-toggle="tab">ALL&nbsp<span class="glyphicon glyphicon-remove"></span></a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="home">
+                                <svg class="vis"></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-default submit">
+              Tab Test
+            </button>
+        </div>
+        <script src="/js/lib/jquery.min.js"></script>
+        <script src="/js/lib/d3.min.js"></script>
+        <script src="/js/lib/bootstrap.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/site/dummy.js"></script>
+        <script src="/js/utils.js"></script>
+        <script src="/js/site/viz.js"></script>
+        <script src="/js/site/barViz.js"></script>
+        <script src="/js/site/visualizer.js"></script>
+        <script src="/js/site/uiListener.js"></script>
+        <script src="/js/site/guiSetup.js"></script>
+        <script src="/js/site/socketHandler.js"></script>
+        <!-- Load this script last (and wrap everything else in a function) -->
+        <script src="/js/site/setup.js"></script>
+    </body>
+</html>
