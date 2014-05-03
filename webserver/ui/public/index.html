@@ -30,16 +30,12 @@
                                     </div>
                                 </div>
                         </div>
-                        <div class="row" id="">
-                          <div class="panel-group" id="accordion">
-                          <div class="panel panel-default">
-                            <div class="panel-heading">
-                              <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                                  View Data
-                                </a>
-                              </h4>
-                            </div>
+                        <div class="row">
+                            <div class="panel-group">
+                            <div class="panel panel-default">
+                            <button type="button" class="btn btn-group-justified" data-toggle="collapse" data-target="#collapseOne">
+                              View Data
+                            </button>
                             <div id="collapseOne" class="panel-collapse collapse in">
                               <div class="panel-body">
                                 <table class="table table-bordered">
@@ -47,13 +43,13 @@
                                 </table>
                               </div>
                             </div>
-                          </div>
-                        </div>
+                            </div>
+                            </div>
                         </div>
                     <!-- Where the visualization will go -->
                     <div class="row vis-row">
                         <ul class="nav nav-tabs">
-                          <li class="active" ><a href="#home" data-toggle="tab">ALL&nbsp<span class="glyphicon glyphicon-remove"></span></a></li>
+                          <li class="active" ><a href="#home" data-toggle="tab"><button class="close closeTab" type="button" id="#homebutton" >×</button>ALL&nbsp</a></li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="home">

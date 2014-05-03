@@ -20,22 +20,27 @@ var guiBuilder = {
     },
 
     buildTupleList: function(tuples) {
-        console.log("these are the attributes:", attributes);
+        console.log("these are the tuples:", tuples);
     },
 
     addTab: function(tabname){
         var tab = $('.nav-tabs')
         var newDiv = $('<div></div>');
+        var close = '<button class="close closeTab" id="#'+tabname+'button" type="button" >×</button>';
         newDiv.addClass("tab-pane active");
         newDiv.attr("id",tabname);
         newDiv.append("<p>Loading new tab..</p>")
         $(".tab-content").append(newDiv);
-        $('.nav-tabs').append('<li><a href=#'+tabname+' data-toggle="tab">'+tabname+'</a></li>');
+        $('.nav-tabs').append('<li><a href=#'+tabname+' data-toggle="tab">'+close+
+            tabname+'&nbsp</a></li>');
         $('.nav-tabs a:last').tab('show');
     },
 
-    deleteTab: function(tabname){
-        
+    deleteTab: function(tab){
+        var tabContentId = tab.parent().attr("href");
+        tab.parent().parent().remove(); //remove li of tab
+        $('.nav-tabs a:last').tab('show'); // Select first tab
+        $(tabContentId).remove();
     }
 
 };
