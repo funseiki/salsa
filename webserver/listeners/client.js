@@ -20,8 +20,7 @@ exports.listen = function(server, daemonPort) {
         });
 
         daemon.on('result', function(data) {
-	    console.log("GOT RESULT: ", data);
-	    console.log("GOT RESULT to string: ", data.toString());
+	    console.log("GOT RESULT: ", data.toString());
             // Send the snapshot result to all connected clients
             io.sockets.emit('result', {'data': data});
         });
