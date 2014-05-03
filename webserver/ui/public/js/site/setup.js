@@ -12,3 +12,14 @@ $(document).ready(function() {
         setupSocket(url, [socketHandler.setupListeners.bind(socketHandler)]);
     });
 });
+
+$('#collapseOne').collapse('hide');
+
+$('#myTab a').click(function (e) {
+  e.preventDefault()
+  $(this).tab('show')
+});
+
+$('.submit').click(function(){
+    guiBuilder.addTab("Test");
+});

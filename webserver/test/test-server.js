@@ -28,7 +28,7 @@ var tuples = [
     "D,11,2",
 ];
 
-var attributes = ["Letter,Number1,Number2"];
+var attributes = ["Letter,Number1,Number2,Letter,Number1,Number2,Letter,Number1,Number2,Letter,Number1,Number2,Letter,Number1,Number2"];
 
 /************* END TEST DATA ****************/
 

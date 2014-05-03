@@ -4,7 +4,7 @@ body {
 }
 
 .list-group {
-    max-height: 500px;
+    max-height: 400px;
     overflow-y:scroll;
 }
 
@@ -29,4 +29,19 @@ body {
 .column-selected {
     color: #31708f;
     background-color: #c4e3f3;
+}
+
+.tab-content{
+    padding-left: 20px;
+    height: 400px;
+}
+
+#collapseOne{
+    overflow-x:scroll;
+}
+
+.vis-row{
+    background-color: #EBF5FF;
+    padding: 10px;
+    
 }
