@@ -32,7 +32,16 @@ var attributes = ["Letter,Number1,Number2,Letter,Number1,Number2,Letter,Number1,
 
 /************* END TEST DATA ****************/
 
-function sendResult(result, isFinal, socket) {
+function startSend(socket, cb) {
+    console.log("Writing to socket ", "START_RESULT");
+    socket.write("START_RESULT\n", cb);
+}
+function endSend(socket, cb) {
+    console.log("Writing to socket ", "END_RESULT");
+    socket.write("END_RESULT\n", cb);
+}
+
+function sendResult(result, isFinal, socket, callback) {
     var start = 'START_RESULT',
         end = 'END_RESULT';
     if(!isFinal) {
@@ -42,6 +51,7 @@ function sendResult(result, isFinal, socket) {
 
     async.waterfall([
         function(cb) {
+            console.log("Writing to socket ", start);
             socket.write(start+"\n", cb);
         },
         function(cb) {
@@ -55,12 +65,15 @@ function sendResult(result, isFinal, socket) {
             });
         }
     ], function(err) {
+        console.log("Writing to socket ", end);
         socket.write(end+"\n");
+        callback();
     });
 }
 
 function doSum(column, groupBy, socket) {
     var i = 1;
+    startSend(socket, stuff);
     function stuff() {
         var out = [
             "1," + i + "," + "4," + (5/(i)),
@@ -68,39 +81,44 @@ function doSum(column, groupBy, socket) {
             "3," + (i+i) + "," + "4," + (5/(i)),
         ];
         if(i < 5) {
-            sendResult(out, false, socket);
-            i++;
-            setTimeout(stuff, 3000);
+            sendResult(out, false, socket, function() {
+                i++;
+                setTimeout(stuff, 3000);
+            });
         }
         else {
-            sendResult(out, true, socket);
+            sendResult(out, false, socket, function() {
+                endSend(socket, function() {});
+            });
         }
     }
-    stuff();
 }
 
 function doTuples(socket) {
-    sendResult(tuples, true, socket);
+    sendResult(tuples, true, socket, function() {});
 }
 
 function doAverage(column, groupBy, socket) {
     var i = 0;
+    startSend(socket, stuff);
     function stuff() {
         var out = test_dump[i];
         if(i < (test_dump.length - 1)) {
-            sendResult(out, false, socket);
-            i++;
-            setTimeout(stuff, 1000);
+            sendResult(out, false, socket, function() {
+                i++;
+                setTimeout(stuff, 1000);
+            });
         }
         else {
-            sendResult(out, true, socket);
+            sendResult(out, false, socket, function() {
+                endSend(socket, function() {});
+            });
         }
     }
-    stuff();
 }
 
 function doAttributes(socket) {
-    sendResult(attributes, true, socket);
+    sendResult(attributes, true, socket, function() {});
 }
 
 function parseInput(input, socket) {

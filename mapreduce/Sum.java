@@ -68,21 +68,13 @@ class Map extends MapReduceBase implements Mapper<LongWritable, Text, Text, Text
            if(group_by != -1)
               word.set(tokens[group_by].trim());
            else
-              word.set("");
-           /*DoubleWritable  value_sum = new DoubleWritable();
-           if(column != -1)
-               value_sum.set(Integer.parseInt(tokens[column]));   
-           else
-               value_sum.set(1);
-           */
+              word.set("SUM");
 
            StringBuilder outpt = new StringBuilder();
            Text val = new Text(); 
            if(column != -1)
-             // val.set(tokens[column].trim());
               outpt.append(tokens[column].trim());
            else
-              //val.set("0");
              outpt.append("0");
            outpt.append(",");
            outpt.append(line.length()+2);
@@ -125,10 +117,10 @@ public class Sum{
               System.out.println("File in path " + fileName);
               if(fileName.contains("part"))
               {
-                   if(fileName.contains(".gz"))
+                  /* if(fileName.contains(".gz"))
                    {
                        System.out.println("File is gz");
-                      /* String cmd = "\"/hadoop/hadoop-hop-0.2/bin/hadoop dfs -cat " + inputPath + "/" + fileName + " | gzcat | wc -c\" ";
+                       String cmd = "\"/hadoop/hadoop-hop-0.2/bin/hadoop dfs -cat " + inputPath + "/" + fileName + " | gzcat | wc -c\" ";
 
                        String[] command = new String[3];
                        command[0] = "/bin/sh";
@@ -173,9 +165,8 @@ public class Sum{
                              System.out.println(line);
                           }
                       } catch (IOException e) { e.printStackTrace(); }  
-                     */ 
                    } //if file is .gz
-                   else
+                   else */
                    { 
                       total_size = total_size + status[i].getLen();
                    }
@@ -305,8 +296,8 @@ public class Sum{
         else
           outpt.append(total_sum);
         outpt.append(",");
-        outpt.append(num_vals);
-        outpt.append(",");
+        //outpt.append(num_vals);
+        //outpt.append(",");
         outpt.append(sum_ConfInter);
         Text out = new Text();
         out.set(outpt.toString());

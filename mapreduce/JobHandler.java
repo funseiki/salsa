@@ -122,7 +122,7 @@ class MapReduceJob extends NotificationThread implements Runnable
           sum_job.stopJob();
 
        }  
-       t.interrupt();
+     //  t.interrupt();
     }
 
     public void startJob()
@@ -165,7 +165,6 @@ class Poll implements Runnable, ThreadCompleteListener
     NotificationThread mapReduceThread;
     //MapReduceJob mapReduceThread;
     Boolean mapReduceComplete;
-    Boolean cancelQuery = false;
     String mostRecentSnapshot;
     Path snapshotPath;
     FileSystem fs;
@@ -181,7 +180,6 @@ class Poll implements Runnable, ThreadCompleteListener
         this.mapReduceThread = mapReduceThread;
         this.mapReduceThread.addListener(this);
         mapReduceComplete = false;
-        cancelQuery = false;
         System.out.println("path of snapshot file: " + dirPath);
     	//this.dirPath = dirPath;
     	this.dirPath = "/query_out/";
@@ -207,9 +205,9 @@ class Poll implements Runnable, ThreadCompleteListener
             long snapshotTime = -1;
             String orig_dirPath = new String(dirPath);
             boolean dir_visited = false;
-            while(!mapReduceComplete && !cancelQuery)
+            while(!mapReduceComplete)
             {
-                Thread.sleep(1000);
+                Thread.sleep(500);
       
                 Path out_dir_path = new Path(dirPath);
                 if(fs.exists(out_dir_path))
@@ -246,9 +244,30 @@ class Poll implements Runnable, ThreadCompleteListener
                     // if(fileName.contains("snapshot")  && status[i].getLen() > 0 && status[i].getModificationTime() > snapshotTime)
 
                     {
+                        try{
                         FSDataInputStream in = fs.open(path);
-                        clientout.println("START_SNAPSHOT");
                         System.out.println(status[i].getModificationTime()+" "+ fileName);
+                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                        String line;
+                        line = br.readLine();
+                        if(line == null)
+                          break;
+                        String[] tokens = fileName.split("-");
+                        if(tokens.length != 3)
+                           break;
+                        for(int j =0;j<tokens.length;j++)
+                           System.out.println(tokens[j]);
+                        clientout.println("START_SNAPSHOT");
+                        while(line != null)
+                        {
+                            String progressLine = line + "," + tokens[1];
+                            System.out.println(progressLine);
+                            clientout.println(progressLine);
+                            line = br.readLine();
+                        }
+                        br.close();
+                        in.close();
+                        /*
                         byte buffer[] = new byte[2048];
                         int bytesRead = 0;
                         while((bytesRead = in.read(buffer)) != -1  )
@@ -260,10 +279,18 @@ class Poll implements Runnable, ThreadCompleteListener
                             {
                                clientout.println(str);
                             }
-                        }
+                        } */
                         clientout.println("END_SNAPSHOT");
+                        } catch (Exception e)
+                        {
+                            System.out.println("While reading file exception happended. probably the temp file is moved.");
+                            dirPath = orig_dirPath;
+                            System.out.println("NEW DIR PATH " + dirPath);
+                            dir_visited = true;
+                        }// end of try reading the file
+                        
                     }
-
+                    
                      if(fileName.contains("snapshot"))
                      //if(fileName.contains("tmp"))
                      {
@@ -281,16 +308,12 @@ class Poll implements Runnable, ThreadCompleteListener
                  } // end for 
                }// if file exists
               } // map reduce complete
-              //fs.delete(new Path("/tmp/tmp"), true);
               
             }catch(Exception e){
 		System.out.println(e);
                 System.out.println("File not found");
             }
             clientout.println("END_RESULT");
-            
-            if(cancelQuery == true)
-              clientout.println("END_RESULT"); 
             clientout.println("Ready to process query!");
     }
     public void notifyOfThreadComplete(Runnable runner)
@@ -334,8 +357,7 @@ public class JobHandler{
     {
         if(p1.mapReduceComplete == false)
          t1.stopJob(); 
-        p1.cancelQuery = true;
-
+        p1.mapReduceComplete = true;
     }
 
     public boolean getStatus()
