@@ -38,6 +38,8 @@ body {
 
 #collapseOne{
     overflow-x:scroll;
+    max-height: 300px;
+    overflow-y:scroll;
 }
 
 .vis-row{

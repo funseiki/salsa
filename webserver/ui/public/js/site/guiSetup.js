@@ -12,15 +12,27 @@ var guiBuilder = {
             entry.attr('data-column', i);
             entry.append(attributes[i])
             list.append(entry);
-            var column = $('<td>'+attributes[i]+'</td>');
+            var column = $('<th>'+attributes[i]+'</th>');
             row.append(column);
         }
         $('.table').append(row);
         uiListener.eventListeners();
+        //Fetch tuples
+        socketHandler.getTuples();
     },
 
     buildTupleList: function(tuples) {
-        console.log("these are the tuples:", tuples);
+        //console.log("these are the tuples:", tuples);
+        for (var i = 0; i < tuples.length; i++){
+            var splitTuples = tuples[i].split(",");
+            console.log("these are the tuples:", splitTuples);
+            var row = $('<tr></tr>');
+            for(var j = 0; j < splitTuples.length; j++) {
+                var column = $('<td>'+splitTuples[j]+'</td>');
+                row.append(column);
+            }
+            $('.table').append(row);
+        }
     },
 
     addTab: function(tabname){
