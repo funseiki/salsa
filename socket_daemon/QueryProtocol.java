@@ -207,7 +207,6 @@ public class QueryProtocol {
             if(theInput.toLowerCase().contains("cancel"))
             {
                System.out.println("Recieved cancel request");
-               clientout.println("START_RESULT");
                if(!cancelQuery())
                  clientout.println("Could not cancel query");
                state = READY;
