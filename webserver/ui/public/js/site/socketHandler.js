@@ -46,5 +46,7 @@ var socketHandler = {
     query: function(query) {
         this.socket.emit('query', query);
         this.state = query.type;
+
+        visualizer.addGraph('Bar');
     }
 };
