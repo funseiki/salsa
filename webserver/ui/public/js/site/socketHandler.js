@@ -43,10 +43,15 @@ var socketHandler = {
             visualizer.update(data);
         });
     },
+    getTuples: function() {
+        this.query({type: 'TUPLES'});
+    },
     query: function(query) {
         this.socket.emit('query', query);
         this.state = query.type;
 
-        visualizer.addGraph('Bar');
+        if(query.type != 'ATTRIBUTE_LIST' || query.type != 'TUPLES') {
+            visualizer.addGraph('Bar');
+        }
     }
 };
