@@ -45,3 +45,8 @@ body {
     padding: 10px;
     
 }
+
+.tab-pane {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
