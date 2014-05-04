@@ -4,13 +4,12 @@ body {
 }
 
 .list-group {
-    max-height: 400px;
+    max-height: 250px;
     overflow-y:scroll;
 }
 
 .btn-group-wrap {
-    text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
 }
 
 .attribute-row {
@@ -19,6 +18,14 @@ body {
 
 .attribute {
 
+}
+
+.start-update{
+    padding: 20px;
+}
+
+.cancel{
+    margin-right: 20px;
 }
 
 .groupBy-selected {

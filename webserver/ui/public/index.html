@@ -21,16 +21,36 @@
                         <ul class="list-group" id="attributes"></ul>
                     </div>
                     <div class="row">
-                        <div class="col-md-5">
+                        <h4>Attributes Selected</h4>
+                    </div>
+                    <div class="row">
+                        <h5>Group By:
+                        <span class="label label-default groupBy-selected"></span></h5>
+                    </div>
+                    <div class="row">
+                        <h5>Column:
+                        <span class="label label-default column-selected"></span></h5>
+                    </div>
+                    <div class="row">
+                        <h4>Operation</h4>
+                                <div class="btn-group-wrap">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default queryButton" data-type='SUM'>Sum</button>
+                                        <button type="button" class="btn btn-default queryButton" data-type='AVERAGE'>Average</button>
+                                    </div>
+                                </div>
+                    </div>
+                    <div class="row start-update">
+                            <div class="col-md-5">
+                            <button type="button" class="btn btn-default start">
+                              Start
+                            </button>
+                            </div>
+                            <div class="col-md-5">
                             <button type="button" class="btn btn-default update">
                               Update
                             </button>
-                        </div>
-                        <div class="col-md-5">
-                            <button type="button" class="btn btn-default cancel">
-                              Cancel
-                            </button>
-                        </div>
+                            </div>
                     </div>
                     <div class="row">
                         <button type="button" class="btn btn-default submit">
@@ -39,14 +59,6 @@
                     </div>
                 </div>
                 <div class="col-md-8 vis-div">
-                        <div class="row">
-                                <div class="btn-group-wrap">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-default queryButton" data-type='SUM'>Sum</button>
-                                        <button type="button" class="btn btn-default queryButton" data-type='AVERAGE'>Average</button>
-                                    </div>
-                                </div>
-                        </div>
                         <div class="row">
                             <div class="panel-group">
                             <div class="panel panel-default">
@@ -72,6 +84,15 @@
                             <div class="tab-pane active" id="home">
                                 <svg class="vis"></svg>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                            <!--Change this to Running Query blah blah on start or update-->
+                            <h5 class="cancel">Test</h5>
+                            </div>
+                            <button type="button" class="btn btn-sm cancel pull-right">
+                              Cancel
+                            </button>
                         </div>
                     </div>
                 </div>

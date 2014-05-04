@@ -74,9 +74,11 @@ var uiListener = {
             else {
                 if(that.isSet('column')) {
                     that.selectAttribute($(event.target), 'groupBy');
+                    $("span.groupBy-selected").text(that.params['groupBy'].name);
                 }
                 else {
                     that.selectAttribute($(event.target), 'column');
+                    $("span.column-selected").text(that.params['column'].name);
                 }
             }
         });

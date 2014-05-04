@@ -25,7 +25,7 @@ var guiBuilder = {
         //console.log("these are the tuples:", tuples);
         for (var i = 0; i < tuples.length; i++){
             var splitTuples = tuples[i].split(",");
-            console.log("these are the tuples:", splitTuples);
+            //console.log("these are the tuples:", splitTuples);
             var row = $('<tr></tr>');
             for(var j = 0; j < splitTuples.length; j++) {
                 var column = $('<td>'+splitTuples[j]+'</td>');
