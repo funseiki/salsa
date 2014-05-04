@@ -97,5 +97,13 @@ var uiListener = {
                 socketHandler.query(queryParams);
             }
         });
+
+        $(".cancel").click(function(event){
+
+        });
+
+        $(".update").click(function(event){
+
+        });
     }
 }

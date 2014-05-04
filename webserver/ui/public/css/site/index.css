@@ -9,8 +9,18 @@ body {
 }
 
 .btn-group-wrap {
-    padding-bottom: 10px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    background-color: #E2E5E5;
+    margin: 5px;
 }
+
+.selected{
+    padding-bottom: 10px;
+    padding-top: 10px;
+    background-color: #E2E5E5;
+}
+
 
 .attribute-row {
     margin-right: 0px;
@@ -20,7 +30,7 @@ body {
 
 }
 
-.start-update{
+.cancel-update{
     padding: 20px;
 }
 
@@ -41,6 +51,10 @@ body {
 .tab-content{
     padding-left: 20px;
     height: 400px;
+}
+
+.progress{
+    margin-left: 20px;
 }
 
 #collapseOne{

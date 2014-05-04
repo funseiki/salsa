@@ -28,3 +28,4 @@ $(".nav-tabs").on('click','button', function(){
     var tab = $(this);
     guiBuilder.deleteTab(tab);
 });
+

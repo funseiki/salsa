@@ -37,10 +37,14 @@ var socketHandler = {
         });
 
         socket.on('snapshot', function(results) {
-            console.log('snapshot', results);
-            var data = results.data.split("\n")
+            console.log('snapshot', results['data']);
+            var data = results['data'].split("\n")
                 .filter(function(value) { return value.length > 0; });
+            var perc = parseFloat(data[0].split(",")[3])*100;
+            console.log(perc);
+            $("#myprogress").css('width', perc+"%");
             visualizer.update(data);
+
         });
     },
     getTuples: function() {
