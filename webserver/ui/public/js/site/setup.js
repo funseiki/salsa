@@ -20,10 +20,6 @@ $('#myTab a').click(function (e) {
   $(this).tab('show')
 });
 
-$('.submit').click(function(){
-    guiBuilder.addTab("Test");
-});
-
 $(".nav-tabs").on('click','button', function(){
     var tab = $(this);
     guiBuilder.deleteTab(tab);

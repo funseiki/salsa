@@ -61,6 +61,7 @@ BarViz.prototype.update = function(inData){
 
     var data = this.convert(inData);
     // Make locals
+    console.log("height", this.height);
     var height = this.height,
         width = this.width,
         margin = this.margin;

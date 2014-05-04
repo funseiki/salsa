@@ -1,15 +1,20 @@
 function Viz(height, width, margin, id) {
     if(arguments.length > 0) {
+        console.log("These are the arguments", arguments);
         // Constructor
         this.height = height;
         this.width = width;
         this.margin = margin;
         this.isDone = false;
         this.id = id;
+        console.log(id);
         // Append a new group which will represent the current visualization
-        this.graph = d3.select('.vis');
+        this.graph = d3.select("#"+id).append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+
         this.chart = this.graph.append("g")
-            .attr("id", "vis-" + id)
+            .attr("id", "vis-" + Math.random())
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         this.dataMap = d3.map();

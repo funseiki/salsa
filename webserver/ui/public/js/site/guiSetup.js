@@ -1,3 +1,5 @@
+var uid = 0;
+var uidString ="vis-"+uid;
 // Singleton for building portions of the UI
 var guiBuilder = {
     buildAttributeList: function(attributeArray) {
@@ -36,16 +38,18 @@ var guiBuilder = {
     },
 
     addTab: function(tabname){
-        var tab = $('.nav-tabs')
+        var tab = $('.nav-tabs');
+        uidString = "vis-"+uid;
         var newDiv = $('<div></div>');
-        var close = '<button class="close closeTab" id="#'+tabname+'button" type="button" >×</button>';
+        var close = '<button class="close closeTab" id="#'+uid+'button" type="button" >×</button>';
         newDiv.addClass("tab-pane active");
-        newDiv.attr("id",tabname);
-        newDiv.append("<p>Loading new tab..</p>")
+        newDiv.attr("id",uidString);
         $(".tab-content").append(newDiv);
-        $('.nav-tabs').append('<li><a href=#'+tabname+' data-toggle="tab">'+close+
+        $('.nav-tabs').append('<li><a href=#'+uidString+' data-toggle="tab">'+close+
             tabname+'&nbsp</a></li>');
         $('.nav-tabs a:last').tab('show');
+        uid++;
+        uidString = "vis-"+uid;
     },
 
     deleteTab: function(tab){
@@ -53,6 +57,10 @@ var guiBuilder = {
         tab.parent().parent().remove(); //remove li of tab
         $('.nav-tabs a:last').tab('show'); // Select first tab
         $(tabContentId).remove();
+    },
+
+    uid: function(){
+        return uidString;
     }
 
 };

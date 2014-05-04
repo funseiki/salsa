@@ -55,7 +55,9 @@ var socketHandler = {
         this.state = query.type;
 
         if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES') {
-            visualizer.addGraph('Bar');
+            var uid = guiBuilder.uid();
+            guiBuilder.addTab(query.type);
+            visualizer.addGraph('Bar', uid);
         }
     }
 };
