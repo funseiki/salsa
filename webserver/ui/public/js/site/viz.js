@@ -33,6 +33,9 @@ Viz.prototype = {
     },
     // Convert the data to object format
     convert: function(data) {
+        if(!data) {
+            data = [];
+        }
         return data.map(function(row) {
             var dataArr = row.split(",");
             return {
