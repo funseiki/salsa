@@ -10,3 +10,21 @@
     fill: steelblue;
     stroke: white;
 }
+
+.bar {
+    fill: steelblue;
+}
+
+.bar.update {
+    fill: brown;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+.x.axis path {
+    display: none;
+}
