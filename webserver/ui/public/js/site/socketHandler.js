@@ -22,7 +22,6 @@ var socketHandler = {
             switch(that.state) {
                 case 'SUM':
                 case 'AVERAGE':
-                    visualizer.update(data);
                     visualizer.done();
                     break;
                 case 'ATTRIBUTE_LIST':
