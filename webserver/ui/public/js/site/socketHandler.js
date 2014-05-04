@@ -24,6 +24,7 @@ var socketHandler = {
                 case 'AVERAGE':
                     visualizer.update();
                     visualizer.done();
+                    $("#myprogress").css('width', "100%");
                     break;
                 case 'ATTRIBUTE_LIST':
                     guiBuilder.buildAttributeList(data);
@@ -41,7 +42,7 @@ var socketHandler = {
             var data = results['data'].split("\n")
                 .filter(function(value) { return value.length > 0; });
             var perc = parseFloat(data[0].split(",")[3])*100;
-            console.log(perc);
+            //console.log(perc);
             $("#myprogress").css('width', perc+"%");
             visualizer.update(data);
 
@@ -50,12 +51,20 @@ var socketHandler = {
     getTuples: function() {
         this.query({type: 'TUPLES'});
     },
+    cancelQuery: function(){
+        this.query({type: 'CANCEL'});
+        visualizer.done();
+    },
+    updateQuery: function(type, column, groupby) {
+        this.query({type: 'UPDATE ' + type + ' ' + column + ' ' + groupby});
+    },
     query: function(query) {
         this.socket.emit('query', query);
         this.state = query.type;
 
-        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES') {
+        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES' && query.type != 'CANCEL' && query.type.indexOf("UPDATE") == -1) {
             var uid = guiBuilder.uid();
+            $("#myprogress").css('width', "0%");
             guiBuilder.addTab(query.type);
             visualizer.addGraph('Bar', uid);
         }

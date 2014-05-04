@@ -25,3 +25,8 @@ $(".nav-tabs").on('click','button', function(){
     guiBuilder.deleteTab(tab);
 });
 
+
+$(".cancel").click(function(event){
+    console.log("Okay");
+    socketHandler.cancelQuery();
+});

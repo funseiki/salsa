@@ -98,10 +98,6 @@ var uiListener = {
             }
         });
 
-        $(".cancel").click(function(event){
-
-        });
-
         $(".update").click(function(event){
 
         });
