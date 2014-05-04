@@ -1,24 +1,102 @@
 function BarViz(height, width, margin, id) {
     Viz.apply(this, arguments);
+    this.barWidth = 50;
+    this.barMargin = 5;
+    this.chart.append("g")
+        .attr("class", "x axis");
+    this.chart.append("g")
+        .attr("class", "y axis")
+        /*.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Frequency");*/
 }
 extend(BarViz, Viz);
 
+BarViz.prototype.vizInit = function(chart, margin, id) {
+    return this.viz;
+}
+
+BarViz.prototype.makeScale = function(height, width, dataMap, graph) {
+    var scale = {};
+    var keys = dataMap.keys(),
+        values = dataMap.values();
+
+    // A way to determine y values
+    scale.y = d3.scale.linear()
+        // Map y(0) to height and y(max(data)) to 0. Scale down linearly
+        .range([height, 0])
+        .domain([0, d3.max(values, this.getVal)]);
+
+    var maxWidth = (this.barWidth+this.barMargin)*keys.length;
+
+    // The range of x output values should be 0 to width (with a .1 padding)
+    scale.x = d3.scale.ordinal()
+        .rangeRoundBands([0, maxWidth], .1)
+        .domain(keys);
+    graph
+        .attr('width', maxWidth + scale.x.rangeBand());
+    return scale;
+}
+
+BarViz.prototype.makeAxes = function(scale) {
+    var xAxis = d3.svg.axis()
+        .scale(scale.x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(scale.y)
+        .orient("left")
+        .ticks(10);
+    return {x: xAxis, y: yAxis};
+}
+
 BarViz.prototype.update = function(inData){
     // Only update if we're not done yet
-    if(this.done) {
+    if(this.isDone) {
         return;
     }
 
-    inData = this.convert(inData);
+    var data = this.convert(inData);
+    // Make locals
+    var height = this.height,
+        width = this.width,
+        margin = this.margin;
+    var bar = this.chart.selectAll(".bar")
+            // The key function
+            .data(data, this.key.bind(this));
 
-    this.x = d3.scale.linear()
-        .rangeRoundBands([0, this.width])
-        // Dummy domain (we'll change this when we get the data)
-        .domain([0, 100]);
+    var scale = this.makeScale(this.height, this.width, this.dataMap, this.graph);
+    var axes = this.makeAxes(scale);
 
-    this.y = d3.scale.linear()
-        // Map y(0) to height and y(max(data) to 0). Scale down linearly
-        .range([this.height, 0])
-        // Dummy domain (this'll change most probably)
-        .domain([0, 100]);
+    var x = scale.x;
+    var y = scale.y;
+
+    this.chart.select(".x.axis")
+        .transition()
+            .duration(750)
+            .attr("transform", "translate(0," + height + ")")
+            .call(axes.x);
+
+    this.chart.select(".y.axis")
+        .transition()
+            .duration(750)
+            .call(axes.y);
+
+    bar.attr("class", "bar update")
+        .transition()
+            .duration(750)
+            .attr("x", function(d) {return x(d.groupBy); })
+            .attr("y", function(d) { return y(d.value); })
+            .attr("height", function(d) { return height - y(d.value);})
+            .attr("width", x.rangeBand());
+
+    bar.enter().append("rect")
+            .attr("class", "bar enter")
+            .attr("x", function(d) { return x(d.groupBy); })
+            .attr("y", function(d) { return y(d.value); })
+            .attr("height", function(d) { return height - y(d.value);})
+            .attr("width", x.rangeBand());
 };
