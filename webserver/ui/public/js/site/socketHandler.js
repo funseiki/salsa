@@ -50,7 +50,7 @@ var socketHandler = {
         this.socket.emit('query', query);
         this.state = query.type;
 
-        if(query.type != 'ATTRIBUTE_LIST' || query.type != 'TUPLES') {
+        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES') {
             visualizer.addGraph('Bar');
         }
     }
