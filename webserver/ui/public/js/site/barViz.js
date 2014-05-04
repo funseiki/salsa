@@ -30,7 +30,7 @@ BarViz.prototype.makeScale = function(height, width, dataMap, graph) {
         .range([height, 0])
         .domain([0, d3.max(values, this.getVal)]);
 
-    var maxWidth = (this.barWidth+this.barMargin)*keys.length;
+    var maxWidth = d3.max([(this.barWidth+this.barMargin)*keys.length, width/2]);
 
     // The range of x output values should be 0 to width (with a .1 padding)
     scale.x = d3.scale.ordinal()
@@ -85,6 +85,8 @@ BarViz.prototype.update = function(inData){
             .duration(750)
             .call(axes.y);
 
+    bar.enter().append("rect");
+
     bar.attr("class", "bar update")
         .transition()
             .duration(750)
@@ -93,10 +95,12 @@ BarViz.prototype.update = function(inData){
             .attr("height", function(d) { return height - y(d.value);})
             .attr("width", x.rangeBand());
 
-    bar.enter().append("rect")
-            .attr("class", "bar enter")
-            .attr("x", function(d) { return x(d.groupBy); })
+    bar.exit().attr("class", "bar")
+        .transition()
+            .duration(750)
+            .attr("x", function(d) {return x(d.groupBy); })
             .attr("y", function(d) { return y(d.value); })
             .attr("height", function(d) { return height - y(d.value);})
             .attr("width", x.rangeBand());
+
 };
