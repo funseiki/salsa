@@ -1,6 +1,6 @@
 var margin = {top: 20, right: 30, bottom: 30, left: 40}
-    width = 500 - margin.left - margin.right,
-    height = 200 - margin.top - margin.bottom;
+    width = 700 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
 var vis = d3.select('.vis')
         .attr("width", width + margin.left + margin.right)
