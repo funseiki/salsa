@@ -42,7 +42,6 @@ var socketHandler = {
             var data = results['data'].split("\n")
                 .filter(function(value) { return value.length > 0; });
             var perc = parseFloat(data[0].split(",")[3])*100;
-            //console.log(perc);
             $("#myprogress").css('width', perc+"%");
             visualizer.update(data);
 
@@ -62,7 +61,8 @@ var socketHandler = {
         this.socket.emit('query', query);
         this.state = query.type;
 
-        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES' && query.type != 'CANCEL' && query.type.indexOf("UPDATE") == -1) {
+        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES') {
+            visualizer.clear();
             var uid = guiBuilder.uid();
             $("#myprogress").css('width', "0%");
             guiBuilder.addTab(query.type);
