@@ -15,6 +15,10 @@
     fill: steelblue;
 }
 
+.bar:hover {
+    fill: grey !important;
+}
+
 .bar.update {
     fill: brown;
 }
