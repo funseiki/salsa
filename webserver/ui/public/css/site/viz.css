@@ -28,3 +28,19 @@
 .x.axis path {
     display: none;
 }
+
+path.line {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+path.dotted-min {
+    stroke-dasharray: 5,5;
+}
+
+path.dotted-max {
+
+    stroke-dasharray: 5,5;
+}
+
