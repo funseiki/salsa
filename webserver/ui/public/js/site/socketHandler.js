@@ -56,15 +56,16 @@ var socketHandler = {
         visualizer.done();
     },
     query: function(query) {
-        this.socket.emit('query', query);
-        this.state = query.type;
-
         if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES' && query.type != 'CANCEL') {
             visualizer.clear();
+            visualizer.done();
             var uid = guiBuilder.uid();
             $("#myprogress").css('width', "0%");
             guiBuilder.addTab(query.type);
             visualizer.addGraph('Bar', uid);
         }
+
+        this.socket.emit('query', query);
+        this.state = query.type;
     }
 };
