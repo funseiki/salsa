@@ -21,6 +21,28 @@ function Viz(height, width, margin, id) {
     }
 }
 
+// Initialize the global map
+Viz.globalMap = d3.map();
+Viz.globalKey = function(data) {
+    var currentSnapshot = Viz.globalMap.get(data.groupBy);
+    if(!currentSnapshot) {
+        currentSnapshot = Viz.globalMap.set(data.groupBy, []);
+    }
+    currentSnapshot.push({groupBy: data.groupBy, value: data.value, completion: data.completion, confidence: data.confidence});
+
+    // Use the groupBy as the key
+    return data.groupBy;
+};
+
+Viz.globalUpdate = function(data) {
+    Viz.prototype.convert(data).forEach(Viz.globalKey);
+};
+
+Viz.globalClear = function() {
+    // clear out the old map
+    Viz.globalMap = d3.map();
+};
+
 Viz.prototype = {
     update: function(data) {
         if(this.isDone) {
