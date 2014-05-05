@@ -53,6 +53,13 @@ BarViz.prototype.makeAxes = function(scale) {
     return {x: xAxis, y: yAxis};
 }
 
+BarViz.prototype.onClick = function(bar) {
+
+    var uid = guiBuilder.uid();
+    guiBuilder.addTab('Groupby: ' + bar.groupBy);
+    visualizer.addGraph('Line', {id: uid, groupBy: bar.groupBy});
+};
+
 BarViz.prototype.update = function(inData){
     // Only update if we're not done yet
     if(this.isDone) {
@@ -61,7 +68,6 @@ BarViz.prototype.update = function(inData){
 
     var data = this.convert(inData);
     // Make locals
-    console.log("height", this.height);
     var height = this.height,
         width = this.width,
         margin = this.margin;
@@ -103,5 +109,7 @@ BarViz.prototype.update = function(inData){
             .attr("y", function(d) { return y(d.value); })
             .attr("height", function(d) { return height - y(d.value);})
             .attr("width", x.rangeBand());
+
+    bar.on("click", this.onClick);
 
 };
