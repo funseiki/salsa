@@ -26,7 +26,4 @@ $(".nav-tabs").on('click','button', function(){
 });
 
 
-$(".cancel").click(function(event){
-    console.log("Okay");
-    socketHandler.cancelQuery();
-});
+

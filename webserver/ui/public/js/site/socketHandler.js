@@ -35,6 +35,7 @@ var socketHandler = {
                 default:
                     break;
             }
+            that.state = "READY";
         });
 
         socket.on('snapshot', function(results) {
@@ -54,14 +55,11 @@ var socketHandler = {
         this.query({type: 'CANCEL'});
         visualizer.done();
     },
-    updateQuery: function(type, column, groupby) {
-        this.query({type: 'UPDATE ' + type + ' ' + column + ' ' + groupby});
-    },
     query: function(query) {
         this.socket.emit('query', query);
         this.state = query.type;
 
-        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES') {
+        if(query.type != 'ATTRIBUTE_LIST' && query.type != 'TUPLES' && query.type != 'CANCEL') {
             visualizer.clear();
             var uid = guiBuilder.uid();
             $("#myprogress").css('width', "0%");

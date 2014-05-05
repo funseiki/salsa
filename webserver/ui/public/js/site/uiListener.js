@@ -90,7 +90,11 @@ var uiListener = {
             $('#query').html(that.query);
             if(that.params.column)
             {
-                var queryParams = {type: that.query, column: that.params.column.columnNumber};
+                var update = "";
+                if(socketHandler.state != "READY") {
+                    update = "UPDATE "
+                }
+                var queryParams = {type: update + that.query, column: that.params.column.columnNumber};
                 if(that.params.groupBy) {
                     queryParams.groupBy = that.params.groupBy.columnNumber;
                 }
@@ -98,8 +102,9 @@ var uiListener = {
             }
         });
 
-        $(".update").click(function(event){
-
+        $(".cancel").click(function(event){
+            socketHandler.cancelQuery();
         });
+
     }
 }
